@@ -73,7 +73,7 @@ def render_curricula() -> Dict[str, List[Dict[str, str]]]:
             f.write(f"```json\n{json}\n```\n")
 
         curricula_structure[CURRICULA_LABEL].append(
-            {module_dir.stem: f"curricula_diagrams/{module_dir.stem}.md"}
+            {module_dir.stem.capitalize(): f"curricula_diagrams/{module_dir.stem}.md"}
         )
 
     return curricula_structure
