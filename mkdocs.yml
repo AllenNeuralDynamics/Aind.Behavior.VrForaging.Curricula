@@ -67,5 +67,3 @@ markdown_extensions:
 nav:
 - Home: index.md
 - Issues: https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.Curricula/issues
-
-

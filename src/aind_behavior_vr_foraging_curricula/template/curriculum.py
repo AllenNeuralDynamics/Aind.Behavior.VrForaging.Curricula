@@ -41,17 +41,16 @@ def st_s_stage_a_s_stage_b(metrics: VrForagingTemplateMetrics) -> bool:
 # ============================================================
 
 curriculum_class = create_curriculum(CURRICULUM_NAME, CURRICULUM_VERSION, (AindVrForagingTaskLogic,), __package__)
-curriculum = curriculum_class()
+CURRICULUM = curriculum_class()
 
 
-curriculum.add_stage_transition(s_stage_a, s_stage_b, StageTransition(st_s_stage_a_s_stage_b))
-
+CURRICULUM.add_stage_transition(s_stage_a, s_stage_b, StageTransition(st_s_stage_a_s_stage_b))
 
 # ==============================================================================
 # Create a Trainer that uses the curriculum to bootstrap suggestions
 # ==============================================================================
 
-TRAINER = Trainer(curriculum)
+TRAINER = Trainer(CURRICULUM)
 
 
 def trainer_state_from_file(path: Union[str, os.PathLike], trainer: Trainer = TRAINER) -> TrainerState:
