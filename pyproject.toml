@@ -23,6 +23,16 @@ dependencies = [
     "pydantic-settings"
 ]
 
+[project.optional-dependencies]
+
+docs = [
+    'mkdocs',
+    'mkdocs-material',
+    'mkdocstrings[python]',
+    'pymdown-extensions',
+    'ruff',
+]
+
 [project.urls]
 Documentation = "https://allenneuraldynamics.github.io/Aind.Behavior.VrForaging.Curricula/"
 Repository = "https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.Curricula/"

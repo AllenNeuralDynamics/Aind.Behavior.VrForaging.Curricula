@@ -1,8 +1,10 @@
 # Aind.Behavior.VrForaging.Curricula
 
-A repository of curricula for VR foraging tasks.
+A repository of curricula for VR foraging task.
 
-# Style guide
+The main repository of the platform is located at https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.
+
+## Style guide
 
 To keep things clear, I suggest the following naming convention:
 
