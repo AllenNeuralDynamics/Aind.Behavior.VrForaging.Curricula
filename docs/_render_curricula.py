@@ -46,31 +46,36 @@ def on_pre_build(config: Dict[str, Any]) -> None:
 
     main()
 
-
 def render_curricula() -> Dict[str, List[Dict[str, str]]]:
-    curricula_structure: Dict[str, List[Dict[str, str]]] = {}
+    curricula_structure: Dict[str, List[Dict[str, str]]] = {CURRICULA_LABEL: []}
 
-    for module_dir in [p for p in Path(SRC_DIR).iterdir() if p.is_dir() and not p.name.startswith("_")]:
+    for module_dir in [
+        p for p in Path(SRC_DIR).iterdir() if p.is_dir() and not p.name.startswith("_")
+    ]:
         module = importlib.import_module(f"{PACKAGE_NAME}.{module_dir.stem}")
         curriculum: Curriculum = getattr(module, "CURRICULUM")
+
         export_diagram(curriculum, DOCS_DIR / "curricula_diagrams" / f"{module_dir.stem}.svg")
-        with open(DOCS_DIR / f"curricula_diagrams/{module_dir.stem}.md", "w") as f:
+
+        md_path = DOCS_DIR / f"curricula_diagrams/{module_dir.stem}.md"
+        with open(md_path, "w") as f:
             f.write(f"# {module_dir.stem}\n\n")
             f.write(f"**Name**: {curriculum.name}\n\n")
             f.write(f"**Version**: {curriculum.version}\n\n")
             f.write(f"**Pkg-location**: {curriculum.pkg_location}\n\n")
             if class_docs := curriculum.__doc__:
-                f.write(f"{class_docs}")
-            # Reference the SVG diagram
+                f.write(f"{class_docs}\n\n")
             f.write("## Diagram\n\n")
-
             svg_path = f"../curricula_diagrams/{module_dir.stem}.svg"
             f.write(f"![{module_dir.stem} diagram]({svg_path})\n\n")
-
             json = curriculum.model_dump_json(indent=2)
             f.write("## Specification\n\n")
             f.write(f"```json\n{json}\n```\n")
-        curricula_structure[module_dir.stem] = [{"diagram": svg_path}]
+
+        curricula_structure[CURRICULA_LABEL].append(
+            {module_dir.stem: f"curricula_diagrams/{module_dir.stem}.md"}
+        )
+
     return curricula_structure
 
 
@@ -79,18 +84,13 @@ def update_mkdocs_yml(curricula_structure: Dict[str, List[Dict[str, str]]]) -> N
         config: Dict[str, Any] = yaml.safe_load(f)
 
     nav: List[Union[str, Dict[str, Any]]] = config.get("nav", [])
-
-    for entry in nav:
-        if isinstance(entry, dict) and CURRICULA_LABEL in entry:
-            curricula_ref: List[Union[str, Dict[str, List[Dict[str, str]]]]] = []
-            for module_name, module_content in curricula_structure.items():
-                display_name = module_name.replace("_", " ").title()
-                curricula_ref.append({display_name: module_content})
-
-            entry[CURRICULA_LABEL] = curricula_ref
+    nav = [item for item in nav if not (isinstance(item, dict) and CURRICULA_LABEL in item)]
+    nav.append({CURRICULA_LABEL: curricula_structure[CURRICULA_LABEL]})
+    config["nav"] = nav
 
     with open(MKDOCS_YML, "w") as f:
         yaml.dump(config, f, sort_keys=False, default_flow_style=False)
+
 
 
 def main() -> None:
