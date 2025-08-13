@@ -2,7 +2,7 @@
 
 A repository of curricula for VR foraging task.
 
-The main repository of the platform is located at https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.
+The main repository of the platform is located [here](https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging).
 
 ## Style guide
 
