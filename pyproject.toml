@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aind-behavior-vr-foraging-curricula"
+description = "A library of curricula for the VrForaging task."
+authors = [ {name = "Bruno Cruz", email = "bruno.cruz@alleninstitute.org"}]
+license = "MIT"
+version = "0.1.0"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: Microsoft :: Windows",
+]
+dynamic = ["readme"]
+
+dependencies = [
+    "aind-behavior-vr-foraging @ git+https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.git@refactor-generalize-patch-reward-function",
+    "aind-behavior-curriculum @  git+https://github.com/AllenNeuralDynamics/aind-behavior-curriculum@27563c12560027bcaa0be3e35d823c14c0d639da",
+    "pydantic-settings"
+]
+
+[project.urls]
+Documentation = "https://allenneuraldynamics.github.io/Aind.Behavior.VrForaging.Curricula/"
+Repository = "https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.Curricula/"
+Issues = "https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.Curricula/issues"
+Changelog = "https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.Curricula/releases"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+readme = {file = "README.md", content-type = "text/markdown"}
+
+[tool.ruff]
+line-length = 120
+target-version = 'py311'
+
+[tool.ruff.lint]
+extend-select = ['Q', 'RUF100', 'C90', 'I']
+extend-ignore = []
+mccabe = { max-complexity = 14 }
+pydocstyle = { convention = 'google' }
+
+[tool.codespell]
+skip = '.git,*.pdf,*.svg,,uv.lock'
+ignore-words-list = 'nd'

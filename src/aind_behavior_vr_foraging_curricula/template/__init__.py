@@ -1,0 +1,2 @@
+CURRICULUM_VERSION = "0.1.0"
+CURRICULUM_NAME = "TemplateCurriculum"
