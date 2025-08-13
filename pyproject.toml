@@ -25,6 +25,12 @@ dependencies = [
 
 [project.optional-dependencies]
 
+dev = [
+    'ruff',
+    'pytest',
+    'interrogate',
+]
+
 docs = [
     'mkdocs',
     'mkdocs-material',
