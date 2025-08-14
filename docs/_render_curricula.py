@@ -46,12 +46,11 @@ def on_pre_build(config: Dict[str, Any]) -> None:
 
     main()
 
+
 def render_curricula() -> Dict[str, List[Dict[str, str]]]:
     curricula_structure: Dict[str, List[Dict[str, str]]] = {CURRICULA_LABEL: []}
 
-    for module_dir in [
-        p for p in Path(SRC_DIR).iterdir() if p.is_dir() and not p.name.startswith("_")
-    ]:
+    for module_dir in [p for p in Path(SRC_DIR).iterdir() if p.is_dir() and not p.name.startswith("_")]:
         module = importlib.import_module(f"{PACKAGE_NAME}.{module_dir.stem}")
         curriculum: Curriculum = getattr(module, "CURRICULUM")
 
@@ -90,7 +89,6 @@ def update_mkdocs_yml(curricula_structure: Dict[str, List[Dict[str, str]]]) -> N
 
     with open(MKDOCS_YML, "w") as f:
         yaml.dump(config, f, sort_keys=False, default_flow_style=False)
-
 
 
 def main() -> None:

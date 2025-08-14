@@ -3,5 +3,4 @@ CURRICULUM_NAME = "TemplateCurriculum"
 
 from .curriculum import CURRICULUM, TRAINER
 
-
 __all__ = ["CURRICULUM_VERSION", "CURRICULUM_NAME", "CURRICULUM", "TRAINER"]
