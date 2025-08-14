@@ -28,7 +28,7 @@ dependencies = [
 dev = [
     'ruff',
     'pytest',
-    'interrogate',
+    'codespell',
 ]
 
 docs = [
