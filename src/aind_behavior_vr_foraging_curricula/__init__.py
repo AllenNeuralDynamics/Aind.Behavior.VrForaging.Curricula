@@ -3,8 +3,8 @@ import sys
 from importlib.metadata import PackageNotFoundError, version
 
 # Create a custom logger
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+curricula_logger = logging.getLogger(__name__)
+curricula_logger.setLevel(logging.DEBUG)
 
 stdout_handler = logging.StreamHandler(sys.stdout)
 stdout_handler.setLevel(logging.INFO)
@@ -18,8 +18,8 @@ stdout_handler.setFormatter(
 stderr_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
 
 # Add handlers to the logger
-logger.addHandler(stdout_handler)
-logger.addHandler(stderr_handler)
+curricula_logger.addHandler(stdout_handler)
+curricula_logger.addHandler(stderr_handler)
 
 
 try:

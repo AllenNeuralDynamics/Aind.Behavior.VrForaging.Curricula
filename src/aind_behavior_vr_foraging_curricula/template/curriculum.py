@@ -15,9 +15,11 @@ from aind_behavior_curriculum import (
 )
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
 
-from . import CURRICULUM_NAME, CURRICULUM_VERSION
 from .metrics import VrForagingTemplateMetrics
 from .stages import s_stage_a, s_stage_b
+
+CURRICULUM_VERSION = "0.1.0"
+CURRICULUM_NAME = "TemplateCurriculum"
 
 TModel = TypeVar("TModel", bound=pydantic.BaseModel)
 
