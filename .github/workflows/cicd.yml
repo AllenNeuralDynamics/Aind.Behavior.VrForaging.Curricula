@@ -1,8 +1,14 @@
 
-name: cicd
+name: Linting & Testing
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
 
 jobs:
   tests:
@@ -11,7 +17,7 @@ jobs:
     if: github.event.pull_request.draft == false
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest]
         python-version: [3.11, 3.12, 3.13]
       fail-fast: false
 
@@ -38,7 +44,7 @@ jobs:
         run: uv run codespell --check-filenames
 
       - name: pytest
-        run: uv run pytest --cov aind_behavior_vr_foraging_curricula
+        run: uv run pytest -cov .
 
       - name: Build
         run: uv build

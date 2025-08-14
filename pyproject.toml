@@ -19,7 +19,7 @@ dynamic = ["readme"]
 
 dependencies = [
     "aind-behavior-vr-foraging @ git+https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.git@refactor-generalize-patch-reward-function",
-    "aind-behavior-curriculum @  git+https://github.com/AllenNeuralDynamics/aind-behavior-curriculum@27563c12560027bcaa0be3e35d823c14c0d639da",
+    "aind-behavior-curriculum",
     "pydantic-settings"
 ]
 
@@ -28,7 +28,7 @@ dependencies = [
 dev = [
     'ruff',
     'pytest',
-    'interrogate',
+    'codespell',
 ]
 
 docs = [
