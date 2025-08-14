@@ -1,6 +1,6 @@
+from .curriculum import CURRICULUM, TRAINER
+
 CURRICULUM_VERSION = "0.1.0"
 CURRICULUM_NAME = "TemplateCurriculum"
-
-from .curriculum import CURRICULUM, TRAINER
 
 __all__ = ["CURRICULUM_VERSION", "CURRICULUM_NAME", "CURRICULUM", "TRAINER"]
