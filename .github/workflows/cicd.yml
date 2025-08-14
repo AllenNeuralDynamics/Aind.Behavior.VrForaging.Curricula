@@ -44,7 +44,7 @@ jobs:
         run: uv run codespell --check-filenames
 
       - name: pytest
-        run: uv run pytest --cov aind_behavior_vr_foraging_curricula
+        run: uv run pytest -cov .
 
       - name: Build
         run: uv build
