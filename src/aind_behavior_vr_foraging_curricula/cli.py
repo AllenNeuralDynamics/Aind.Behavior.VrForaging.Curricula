@@ -15,7 +15,7 @@ TMetrics = t.TypeVar("TMetrics", bound=aind_behavior_curriculum.Metrics)
 
 class CurriculumCliArgs(BaseSettings):
     data_directory: os.PathLike = Field(description="Path to the session data directory.")
-    input_trainer_state: os.PathLike = Field(description="Path to a deserializable trainer state.")
+    input_trainer_state: os.PathLike = Field(description="Path to a deserialized trainer state.")
     mute_suggestion: CliImplicitFlag[bool] = Field(default=False, description="Disables the suggestion output")
     output_suggestion: t.Optional[os.PathLike] = Field(
         default=None,
