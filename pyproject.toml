@@ -18,10 +18,11 @@ classifiers = [
 dynamic = ["readme"]
 
 dependencies = [
-    "aind-behavior-vr-foraging @ git+https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.git@refactor-generalize-patch-reward-function",
+    "aind-behavior-vr-foraging[data] @ git+https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.git@refactor-generalize-patch-reward-function",
     "aind-behavior-curriculum",
-    "pydantic-settings"
+    "pydantic-settings",
 ]
+
 
 [project.optional-dependencies]
 
@@ -62,5 +63,5 @@ mccabe = { max-complexity = 14 }
 pydocstyle = { convention = 'google' }
 
 [tool.codespell]
-skip = '.git,*.pdf,*.svg,,uv.lock'
+skip = '.git,*.pdf,*.svg,uv.lock'
 ignore-words-list = 'nd'
