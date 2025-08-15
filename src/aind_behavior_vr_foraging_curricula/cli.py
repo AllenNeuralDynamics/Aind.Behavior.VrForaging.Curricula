@@ -56,7 +56,7 @@ def make_entry_point(
             try:
                 suggestion = runner(args.run)
                 suggestion.version = curriculum_version
-                suggestion.dsl_version = __version__
+                suggestion.dsl_version = aind_behavior_curriculum.__version__
 
                 if not args.run.mute_suggestion:
                     curricula_logger.info(suggestion.model_dump_json())
