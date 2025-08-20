@@ -113,5 +113,10 @@ class CurriculumSuggestion(BaseModel, t.Generic[TTrainerState, TMetrics]):
 
 _KNOWN_CURRICULA = [p.stem for p in Path(__file__).parent.iterdir() if p.is_dir() and not p.name.startswith("_")]
 
-if __name__ == "__main__":
+
+def main():
     CliApp.run(CurriculumAppCliArgs, cli_exit_on_error=True)
+
+
+if __name__ == "__main__":
+    main()
