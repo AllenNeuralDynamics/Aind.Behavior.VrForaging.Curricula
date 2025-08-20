@@ -75,4 +75,4 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 
 [project.scripts]
-aind_behavior_vr_foraging_curricula = "aind_behavior_vr_foraging_curricula.cli:main"
+curriculum = "aind_behavior_vr_foraging_curricula.cli:main"
