@@ -1,3 +1,4 @@
+import importlib
 import os
 import typing as t
 from pathlib import Path
@@ -11,6 +12,35 @@ from . import __version__, curricula_logger
 TModel = t.TypeVar("TModel", bound=BaseModel)
 TTrainerState = t.TypeVar("TTrainerState", bound=aind_behavior_curriculum.TrainerState)
 TMetrics = t.TypeVar("TMetrics", bound=aind_behavior_curriculum.Metrics)
+TCurriculum = t.TypeVar("TCurriculum", bound=aind_behavior_curriculum.Curriculum)
+
+
+def model_from_json_file(json_path: os.PathLike | str, model: type[TModel]) -> TModel:
+    with open(Path(json_path), "r", encoding="utf-8") as file:
+        return model.model_validate_json(file.read())
+
+
+class Version(RootModel):
+    root: t.Any
+
+    def cli_cmd(self) -> None:
+        curricula_logger.info(__version__)
+
+
+class DslVersion(RootModel):
+    root: t.Any
+
+    def cli_cmd(self) -> None:
+        curricula_logger.info(aind_behavior_curriculum.__version__)
+
+
+class ListKnownCurricula(RootModel):
+    root: t.Any
+
+    def cli_cmd(self) -> None:
+        curricula_logger.info("Available curricula:")
+        for curriculum in _KNOWN_CURRICULA:
+            curricula_logger.info(f" - {curriculum}")
 
 
 class CurriculumCliArgs(BaseSettings):
@@ -21,16 +51,55 @@ class CurriculumCliArgs(BaseSettings):
         default=None,
         description="A path to save the suggestion. If not provided, the suggestion will not be serialized to a file.",
     )
+    curriculum: t.Optional[str] = Field(
+        default=None, description="Forces the use of a specific curriculum, bypassing any automatic detection."
+    )
 
+    def cli_cmd(self) -> None:
+        try:
+            if self.curriculum:
+                curriculum_name = self.curriculum
+            else:
+                annonymous_trainer_state = model_from_json_file(
+                    self.input_trainer_state,
+                    aind_behavior_curriculum.TrainerState[aind_behavior_curriculum.Curriculum[t.Any]],
+                )
+                if (curriculum := annonymous_trainer_state.curriculum) is None:
+                    curricula_logger.error("Trainer state does not have a curriculum.")
+                    raise ValueError("Trainer state does not have a curriculum.")
+                curriculum_name = curriculum.name
 
-class _AnyRoot(RootModel):
-    root: t.Any
+            if curriculum_name not in _KNOWN_CURRICULA:
+                curricula_logger.error(f"Unknown curriculum: {curriculum_name}. Available: {list(_KNOWN_CURRICULA)}")
+                raise ValueError(f"Unknown curriculum: {curriculum_name}. Available: {list(_KNOWN_CURRICULA)}")
+
+            else:
+                module = importlib.import_module(f"{__package__}.{curriculum_name}")
+                runner: t.Callable[[CurriculumCliArgs], CurriculumSuggestion] = getattr(module, "run_curriculum")
+
+            suggestion = runner(self)
+            suggestion.dsl_version = aind_behavior_curriculum.__version__
+
+            if not self.mute_suggestion:
+                curricula_logger.info(suggestion.model_dump_json())
+
+            if self.output_suggestion is not None:
+                with open(Path(self.output_suggestion) / "suggestion.json", "w", encoding="utf-8") as file:
+                    file.write(suggestion.model_dump_json(indent=2))
+
+        except Exception as e:
+            curricula_logger.error(f"Error occurred while running curriculum: {e}")
+            raise e
 
 
 class CurriculumAppCliArgs(BaseSettings, cli_prog_name="curriculum", cli_kebab_case=True):
     run: CliSubCommand[CurriculumCliArgs]
-    version: CliSubCommand[_AnyRoot]
-    dsl_version: CliSubCommand[_AnyRoot]
+    version: CliSubCommand[Version]
+    dsl_version: CliSubCommand[DslVersion]
+    list: CliSubCommand[ListKnownCurricula]
+
+    def cli_cmd(self) -> None:
+        CliApp.run_subcommand(self)
 
 
 class CurriculumSuggestion(BaseModel, t.Generic[TTrainerState, TMetrics]):
@@ -42,42 +111,7 @@ class CurriculumSuggestion(BaseModel, t.Generic[TTrainerState, TMetrics]):
     )
 
 
-def make_entry_point(
-    runner: t.Callable[[CurriculumCliArgs], CurriculumSuggestion], curriculum_version: str
-) -> t.Callable[[], t.Optional[CurriculumSuggestion]]:
-    """
-    Creates an entry point for the curriculum CLI application.
-    """
+_KNOWN_CURRICULA = [p.stem for p in Path(__file__).parent.iterdir() if p.is_dir() and not p.name.startswith("_")]
 
-    def _wrapped() -> t.Optional[CurriculumSuggestion]:
-        args = CliApp.run(CurriculumAppCliArgs, cli_exit_on_error=True)
-
-        if args.run is not None:
-            try:
-                suggestion = runner(args.run)
-                suggestion.version = curriculum_version
-                suggestion.dsl_version = aind_behavior_curriculum.__version__
-
-                if not args.run.mute_suggestion:
-                    curricula_logger.info(suggestion.model_dump_json())
-
-                if args.run.output_suggestion is not None:
-                    with open(Path(args.run.output_suggestion) / "suggestion.json", "w", encoding="utf-8") as file:
-                        file.write(suggestion.model_dump_json(indent=2))
-
-                return suggestion
-
-            except Exception as e:
-                curricula_logger.error(f"Error occurred while running curriculum: {e}")
-                raise e
-
-        if args.version:
-            curricula_logger.info(curriculum_version)
-            return None
-        if args.dsl_version:
-            curricula_logger.info(aind_behavior_curriculum.__version__)
-            return None
-
-        raise RuntimeError("No valid subcommand provided.")
-
-    return _wrapped
+if __name__ == "__main__":
+    CliApp.run(CurriculumAppCliArgs, cli_exit_on_error=True)
