@@ -12,7 +12,7 @@ A repository of curricula for [VR foraging task](https://github.com/AllenNeuralD
 
 Curricula are modules of the main package: `aind_behavior_vr_foraging_curricula.<curriculum_name>`. 
 
-All curricula are available via the `curriculum` cli entry point. Available list of commands is availble via the `-h` flag:
+All curricula are available via the `curriculum` cli entry point. Available list of commands is printed with the `-h` flag:
 
 ```bash
 uv run curriculum -h
@@ -23,7 +23,7 @@ uv run curriculum -h
 Available curricula can be listed from the cli using:
 
 ```bash
-`uv run curriculum list`
+uv run curriculum list
 ```
 
 ### Running a curriculum
@@ -48,7 +48,7 @@ For a quick "demo" to ensure everything is working, you can run:
 uv run curriculum run --data-directory "demo" --input-trainer-state "foo.json" --curriculum "template"
 ```
 
-For real-world applications, you may want to ommit the "--curriculum" flag and let the system automatically detect the curriculum from the trainer state.
+For real-world applications, you may want to omit the "--curriculum" flag and let the system automatically detect the curriculum from the trainer state.
 
 
 ## Style guide
