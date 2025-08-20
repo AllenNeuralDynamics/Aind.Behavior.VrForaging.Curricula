@@ -10,18 +10,28 @@ A repository of curricula for [VR foraging task](https://github.com/AllenNeuralD
 
 ## How to run a specific curriculum?
 
-Curricula are modules of the main package: `aind_behavior_vr_foraging_curricula.<curriculum_name>`. Each curriculum implements a uniform command-line interface:
+Curricula are modules of the main package: `aind_behavior_vr_foraging_curricula.<curriculum_name>`. 
 
-The interface can be access by running the module or python script directly (I will consider the `template` curriculum as an example):
+All curricula are available via the `curriculum` cli entry point. Available list of commands is availble via the `-h` flag:
 
 ```bash
-uv run python -m aind_behavior_vr_foraging_curricula.template -h
+uv run curriculum -h
 ```
 
-This command will print out the available interface for the CLI. To run a curriculum iteration, you can use the `run` subcommand:
+### List available curricula
+
+Available curricula can be listed from the cli using:
 
 ```bash
-uv run python -m aind_behavior_vr_foraging_curricula.template run -h
+`uv run curriculum list`
+```
+
+### Running a curriculum
+
+Curricula can be run using the `run` subcommand of the `curriculum` cli entry point.
+
+```bash
+uv run curriculum run -h
 ```
 
 The following arguments are available for the `run` subcommand:
@@ -30,12 +40,16 @@ The following arguments are available for the `run` subcommand:
 * `--input-trainer-state`: Path to a deserialized json file with the current trainer state (required)
 * `--mute-suggestion`: Disables the suggestion output (optional)
 * `--output-suggestion`: A path to save the serialized suggestion (optional)
+* `--curriculum`: The name of the curriculum to run (optional)
 
 For a quick "demo" to ensure everything is working, you can run:
-
+    
 ```bash
-uv run python -m aind_behavior_vr_foraging_curricula.template run --data-directory "demo" --input-trainer-state "foo.json"
+uv run curriculum run --data-directory "demo" --input-trainer-state "foo.json" --curriculum "template"
 ```
+
+For real-world applications, you may want to ommit the "--curriculum" flag and let the system automatically detect the curriculum from the trainer state.
+
 
 ## Style guide
 

@@ -67,8 +67,9 @@ class CurriculumCliArgs(BaseSettings):
                 if (curriculum := annonymous_trainer_state.curriculum) is None:
                     curricula_logger.error("Trainer state does not have a curriculum.")
                     raise ValueError("Trainer state does not have a curriculum.")
-                curriculum_name = curriculum.name
+                curriculum_name = curriculum.pkg_location
 
+            curriculum_name = curriculum_name.replace(str(__package__) + ".", "")
             if curriculum_name not in _KNOWN_CURRICULA:
                 curricula_logger.error(f"Unknown curriculum: {curriculum_name}. Available: {list(_KNOWN_CURRICULA)}")
                 raise ValueError(f"Unknown curriculum: {curriculum_name}. Available: {list(_KNOWN_CURRICULA)}")

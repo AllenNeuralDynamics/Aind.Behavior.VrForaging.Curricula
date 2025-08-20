@@ -23,7 +23,6 @@ dependencies = [
     "pydantic-settings",
 ]
 
-
 [project.optional-dependencies]
 
 dev = [
