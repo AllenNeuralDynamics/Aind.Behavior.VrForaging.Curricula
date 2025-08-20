@@ -1,39 +1,46 @@
+import logging
 from typing import cast
 
 import aind_behavior_curriculum
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
+from pydantic_settings import CliApp
 
-from aind_behavior_vr_foraging_curricula.template import run_curriculum
-from aind_behavior_vr_foraging_curricula.template.__test_placeholder import make as make_placeholder
-from aind_behavior_vr_foraging_curricula.template.stages import s_stage_b
-from tests import suppress_all_logging
-from tests.conftest import run_cli_with_args
+from aind_behavior_vr_foraging_curricula.cli import CurriculumAppCliArgs, CurriculumSuggestion
+from aind_behavior_vr_foraging_curricula.template import CURRICULUM_VERSION, __test_placeholder, run_curriculum
+from aind_behavior_vr_foraging_curricula.template.curriculum import s_stage_b
 
 
 def dummy_runner(args):
     return run_curriculum(args)
 
 
-def test_make_entry_point_with_extra_cli_args():
-    injected_cli_args = [
-        "run",
-        "--data-directory",
-        "demo",
-        "--input-trainer-state",
-        "state.json",
-    ]
-
-    with suppress_all_logging():
-        suggestion = run_cli_with_args(dummy_runner, "0.0.0", injected_cli_args)
-        trainer_state_expected, metrics_expected = make_placeholder()
+def test_cli(caplog):
+    trainer_state, metrics = __test_placeholder.make()
+    trainer_state = aind_behavior_curriculum.TrainerState.model_validate_json(trainer_state.model_dump_json())
+    metrics = aind_behavior_curriculum.Metrics.model_validate_json(metrics.model_dump_json())
+    CliApp.run(
+        CurriculumAppCliArgs,
+        cli_args=[
+            "run",
+            "--data-directory",
+            "demo",  # import to trigger test mode
+            "--input-trainer-state",
+            "state.json",
+            "--curriculum",
+            "template",
+        ],
+    )
+    with caplog.at_level(logging.INFO, logger="aind_behavior_vr_foraging_curricula"):
+        msgs = [m.getMessage() for m in caplog.records]
+        suggestion = CurriculumSuggestion.model_validate_json(msgs[0])
 
     assert suggestion is not None
 
     task = cast(AindVrForagingTaskLogic, suggestion.trainer_state.stage.task)
 
-    assert suggestion.trainer_state.curriculum == trainer_state_expected.curriculum
+    assert suggestion.trainer_state.curriculum == trainer_state.curriculum
     assert suggestion.trainer_state.stage == s_stage_b
-    assert suggestion.metrics == metrics_expected
+    assert suggestion.metrics == metrics
     assert task.task_parameters.rng_seed == s_stage_b.task.task_parameters.rng_seed
-    assert suggestion.version == "0.0.0"
+    assert suggestion.version == CURRICULUM_VERSION
     assert suggestion.dsl_version == aind_behavior_curriculum.__version__

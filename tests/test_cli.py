@@ -1,26 +1,41 @@
 import importlib
 import logging
-from pathlib import Path
 
-from aind_behavior_curriculum import __version__
+from aind_behavior_curriculum import __version__ as dsl_version
+from pydantic_settings import CliApp
 
+from aind_behavior_vr_foraging_curricula import __version__ as version
 from aind_behavior_vr_foraging_curricula import curricula_logger
-from tests import REPO_ROOT
-from tests.conftest import run_cli_with_args
+from aind_behavior_vr_foraging_curricula.cli import _KNOWN_CURRICULA, CurriculumAppCliArgs
 
 
-def test_all_curricula_have_cli(caplog):
+def test_known_curricula(caplog):
     curricula_logger.handlers.clear()  # the stdout pollutes the test
+    CliApp.run(CurriculumAppCliArgs, cli_args=["list"])
+    with caplog.at_level(logging.INFO, logger="aind_behavior_vr_foraging_curricula"):
+        msgs = [m.getMessage() for m in caplog.records]
+        recovered = [m.strip(" -") for m in msgs if m.strip().startswith("-")]
+        assert set(recovered) == set(_KNOWN_CURRICULA)
 
-    for module_dir in [
-        p
-        for p in Path(REPO_ROOT / "src/aind_behavior_vr_foraging_curricula").iterdir()
-        if p.is_dir() and not p.name.startswith("_")
-    ]:
-        module = importlib.import_module(f"aind_behavior_vr_foraging_curricula.{module_dir.name}")
-        runner = getattr(module, "run_curriculum", None)
-        assert runner is not None, f"Module {module_dir.name} does not have a 'run_curriculum' function."
-        with caplog.at_level(logging.INFO, logger="aind_behavior_vr_foraging_curricula"):
-            run_cli_with_args(runner, "0.0.0", ["dsl-version"])
-        _ = run_cli_with_args(runner, "0.0.0", ["dsl-version"])
-        assert any(__version__ == record.getMessage() for record in caplog.records)
+
+def test_version(caplog):
+    curricula_logger.handlers.clear()  # the stdout pollutes the test
+    CliApp.run(CurriculumAppCliArgs, cli_args=["version"])
+    with caplog.at_level(logging.INFO, logger="aind_behavior_vr_foraging_curricula"):
+        msgs = [m.getMessage() for m in caplog.records]
+        assert msgs == [version]
+
+
+def test_dsl_version(caplog):
+    curricula_logger.handlers.clear()  # the stdout pollutes the test
+    CliApp.run(CurriculumAppCliArgs, cli_args=["dsl-version"])
+    with caplog.at_level(logging.INFO, logger="aind_behavior_vr_foraging_curricula"):
+        msgs = [m.getMessage() for m in caplog.records]
+        assert msgs == [dsl_version]
+
+
+def test_known_curricula_implement_runner():
+    for curriculum in _KNOWN_CURRICULA:
+        module = importlib.import_module(f"aind_behavior_vr_foraging_curricula.{curriculum}")
+        runner = getattr(module, "run_curriculum")
+        del module, runner

@@ -1,7 +1,8 @@
 import os
-import pathlib
-from typing import TypeVar, Union
+from pathlib import Path
+from typing import Any, TypeVar, Union
 
+import aind_behavior_curriculum
 import pydantic
 
 # This curriculum only has 2 stages and a single transition from stage 1 to stage 2
@@ -15,18 +16,15 @@ from aind_behavior_curriculum import (
 )
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
 
+from ..cli import CurriculumCliArgs, CurriculumSuggestion, model_from_json_file
 from .metrics import VrForagingTemplateMetrics
 from .stages import s_stage_a, s_stage_b
 
 CURRICULUM_VERSION = "0.1.0"
 CURRICULUM_NAME = "TemplateCurriculum"
+PKG_LOCATION = ".".join(__name__.split(".")[:-1])
 
 TModel = TypeVar("TModel", bound=pydantic.BaseModel)
-
-
-def model_from_json_file(json_path: os.PathLike | str, model: type[TModel]) -> TModel:
-    with open(pathlib.Path(json_path), "r", encoding="utf-8") as file:
-        return model.model_validate_json(file.read())
 
 
 # ============================================================
@@ -42,7 +40,9 @@ def st_s_stage_a_s_stage_b(metrics: VrForagingTemplateMetrics) -> bool:
 # Curriculum definition
 # ============================================================
 
-curriculum_class = create_curriculum(CURRICULUM_NAME, CURRICULUM_VERSION, (AindVrForagingTaskLogic,), __package__)
+curriculum_class: type = create_curriculum(
+    CURRICULUM_NAME, CURRICULUM_VERSION, (AindVrForagingTaskLogic,), pkg_location=PKG_LOCATION
+)
 CURRICULUM = curriculum_class()
 
 
@@ -67,3 +67,20 @@ def metrics_from_dataset_path(dataset_path: Union[str, os.PathLike], trainer_sta
         raise ValueError("Stage does not have a metrics provider")
     metrics_provider = stage.metrics_provider
     return metrics_provider.callable(dataset_path)
+
+
+def run_curriculum(args: CurriculumCliArgs) -> CurriculumSuggestion[TrainerState[Any], Any]:
+    metrics: aind_behavior_curriculum.Metrics
+    if args.data_directory == Path("demo"):
+        from . import __test_placeholder
+
+        trainer_state, metrics = __test_placeholder.make()
+
+    else:
+        trainer_state = trainer_state_from_file(args.input_trainer_state)
+        metrics = metrics_from_dataset_path(args.data_directory, trainer_state)
+        return CurriculumSuggestion(
+            trainer_state=trainer_state, metrics=metrics, dsl_version=aind_behavior_curriculum.__version__
+        )
+    trainer_state = TRAINER.evaluate(trainer_state, metrics)
+    return CurriculumSuggestion(trainer_state=trainer_state, metrics=metrics, version=CURRICULUM_VERSION)
