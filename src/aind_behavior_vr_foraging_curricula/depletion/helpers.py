@@ -59,7 +59,7 @@ def make_intersite(length_distribution: distributions.Distribution) -> task_logi
     )
 
 
-def make_patch(length_distribution: distributions.Distribution) -> task_logic.VirtualSiteGenerator:
+def make_interpatch(length_distribution: distributions.Distribution) -> task_logic.VirtualSiteGenerator:
     return task_logic.VirtualSiteGenerator(
         render_specification=task_logic.RenderSpecification(contrast=0.5),
         label=task_logic.VirtualSiteLabels.INTERPATCH,

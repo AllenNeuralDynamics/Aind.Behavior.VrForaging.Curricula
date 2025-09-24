@@ -1,6 +1,7 @@
 from typing import Callable
 
 from aind_behavior_curriculum import MetricsProvider, Policy, Stage
+from aind_behavior_services.task_logic import distributions
 from aind_behavior_vr_foraging import task_logic
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic, AindVrForagingTaskParameters
 
@@ -29,11 +30,76 @@ def p_stochastic_reward(metrics: DepletionCurriculumMetrics, task: AindVrForagin
     return task
 
 
-def p_learn_to_run(metrics: DepletionCurriculumMetrics, task: AindVrForagingTaskLogic) -> AindVrForagingTaskLogic: ...
+def p_learn_to_run(metrics: DepletionCurriculumMetrics, task: AindVrForagingTaskLogic) -> AindVrForagingTaskLogic:
+    if metrics.n_patches_visited > 200:
+        patch_gen = task.task_parameters.environment.blocks[0].environment_statistics.patches[0].patch_virtual_sites_generator
+        
+        #assert isinstance(patch_gen.inter_patch.length_distribution, distributions.ExponentialDistribution)
+        #assert isinstance(patch_gen.inter_site.length_distribution, distributions.ExponentialDistribution)
+        #assert isinstance(patch_gen.reward_site.length_distribution, distributions.ExponentialDistribution)
+        assert patch_gen.inter_site.length_distribution.truncation_parameters is not None
+        patch_gen.inter_site.length_distribution.truncation_parameters.min = _clamp(
+            patch_gen.inter_site.length_distribution.truncation_parameters.min * 1.5,
+            minimum=10,
+            maximum=30,
+        )
+        patch_gen.inter_site.length_distribution.truncation_parameters.max = _clamp(
+            patch_gen.inter_site.length_distribution.truncation_parameters.max * 1.5,
+            minimum=30,
+            maximum=100,
+        )
+        
+        assert patch_gen.inter_patch.length_distribution.truncation_parameters is not None
+        patch_gen.inter_patch.length_distribution.truncation_parameters.min = _clamp(
+            patch_gen.inter_patch.length_distribution.truncation_parameters.min + 10,
+            minimum=20,
+            maximum=75,
+        )
+        patch_gen.inter_patch.length_distribution.truncation_parameters.max = _clamp(
+            patch_gen.inter_patch.length_distribution.truncation_parameters.max + 10,
+            minimum=30,
+            maximum=100,
+        )
 
+    #Intersite: min start at 10, maximum at 30. if value <20 = value + 10. If value >30, value + (value – 20). Maximum of 20, 100.  This one is too messy!
+
+    #Odorsite: start = 20; +10 every time rule 1 is met. Maximum of 50.  
+
+    #Interpatch: start min 25, start max 75. x2 both every time rule 1 is met. Maximum of 200,600.
 
 def p_learn_to_stop(metrics: DepletionCurriculumMetrics, task: AindVrForagingTaskLogic) -> AindVrForagingTaskLogic:
-    pass
+    if metrics.n_choices > 100:
+        task.task_parameters.updaters[
+            task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD
+        ].parameters.initial_value = _clamp(
+            task.task_parameters.updaters[task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD].parameters.initial_value
+            - 16.6,
+            minimum=10,
+            maximum=60,
+        )
+        task.task_parameters.updaters[
+            task_logic.UpdaterTarget.STOP_DURATION_OFFSET
+        ].parameters.maximum = task.task_parameters.updaters[
+            task_logic.UpdaterTarget.STOP_DURATION_OFFSET
+        ].parameters.initial_value
+
+        task.task_parameters.updaters[task_logic.UpdaterTarget.REWARD_DELAY_OFFSET].parameters.initial_value = _clamp(
+            task.task_parameters.updaters[task_logic.UpdaterTarget.REWARD_DELAY_OFFSET].parameters.initial_value + 0.1,
+            minimum=0,
+            maximum=0.5,
+        )
+        task.task_parameters.updaters[
+            task_logic.UpdaterTarget.REWARD_DELAY_OFFSET
+        ].parameters.maximum = task.task_parameters.updaters[
+            task_logic.UpdaterTarget.REWARD_DELAY_OFFSET
+        ].parameters.initial_value
+
+        task.task_parameters.updaters[task_logic.UpdaterTarget.STOP_DURATION_OFFSET].parameters.initial_value = _clamp(
+            task.task_parameters.updaters[task_logic.UpdaterTarget.STOP_DURATION_OFFSET].parameters.initial_value + 0.1,
+            minimum=0,
+            maximum=0.5,
+        )
+    return task
 
 
 # ============================================================
@@ -66,7 +132,7 @@ s_stage_one_odor_no_depletion = Stage(
                     parameters=task_logic.NumericalUpdaterParameters(
                         initial_value=60,
                         on_success=0.99,
-                        minimum=8,
+                        minimum=10,
                         maximum=60,
                     ),
                 ),
@@ -86,6 +152,17 @@ s_stage_one_odor_no_depletion = Stage(
                                         probability=task_logic.scalar_value(1),
                                         available=task_logic.scalar_value(9999),
                                         reward_function=[],
+                                    ),
+                                    patch_virtual_sites_generator=task_logic.PatchVirtualSitesGenerator(
+                                        inter_patch=helpers.make_interpatch(
+                                            length_distribution=helpers.uniform_distribution(100, 150)
+                                        ),  # TODO
+                                        inter_site=helpers.make_intersite(
+                                            length_distribution=helpers.uniform_distribution(15, 25)
+                                        ),
+                                        reward_site=helpers.make_reward_site(
+                                            length_distribution=helpers.normal_distribution(60, 5)
+                                        ),
                                     ),
                                 )
                             ]
