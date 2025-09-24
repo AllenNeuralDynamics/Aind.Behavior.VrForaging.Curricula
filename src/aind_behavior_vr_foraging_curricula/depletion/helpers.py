@@ -1,5 +1,5 @@
-from aind_behavior_vr_foraging import task_logic
 from aind_behavior_services.task_logic import distributions
+from aind_behavior_vr_foraging import task_logic
 
 
 def make_default_operation_control(time_to_collect: float, velocity_threshold: float) -> task_logic.OperationControl:

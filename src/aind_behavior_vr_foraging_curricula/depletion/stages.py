@@ -1,10 +1,12 @@
 from typing import Callable
-import aind_behavior_services.task_logic.distributions as distributions
+
 from aind_behavior_curriculum import MetricsProvider, Policy, Stage
 from aind_behavior_vr_foraging import task_logic
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic, AindVrForagingTaskParameters
-from .metrics import DepletionCurriculumMetrics, metrics_from_dataset
+
 from . import helpers
+from .metrics import DepletionCurriculumMetrics, metrics_from_dataset
+
 # ============================================================
 # Policies to update task parameters based on metrics
 # ============================================================
