@@ -66,3 +66,7 @@ def make_interpatch(length_distribution: distributions.Distribution) -> task_log
         length_distribution=length_distribution,
         treadmill_specification=task_logic.TreadmillSpecification(friction=task_logic.scalar_value(0)),
     )
+
+
+def clamp(value: float, minimum: float, maximum: float) -> float:
+    return max(minimum, min(value, maximum))
