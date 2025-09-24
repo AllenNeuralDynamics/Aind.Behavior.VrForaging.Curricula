@@ -18,7 +18,7 @@ classifiers = [
 dynamic = ["readme"]
 
 dependencies = [
-    "aind-behavior-vr-foraging[data] @ git+https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.git@refactor-generalize-patch-reward-function",
+    "aind-behavior-vr-foraging[data] @ git+https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.git@main",
     "aind-behavior-curriculum",
     "pydantic-settings",
 ]
