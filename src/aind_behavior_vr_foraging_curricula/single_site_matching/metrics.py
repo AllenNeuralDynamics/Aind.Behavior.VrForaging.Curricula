@@ -1,0 +1,70 @@
+import logging
+import os
+from typing import cast
+
+import pandas as pd
+from aind_behavior_curriculum import Metrics
+from aind_behavior_vr_foraging.data_contract import dataset as vr_foraging_dataset
+from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
+from contraqctor.contract.json import SoftwareEvents
+from pydantic import Field, NonNegativeFloat, NonNegativeInt
+
+logger = logging.getLogger(__name__)
+
+
+class DepletionCurriculumMetrics(Metrics):
+    total_water_consumed: NonNegativeFloat = Field(description="Total water (in milliliters) consumed in the session.")
+
+    n_choices: NonNegativeInt = Field(
+        description="Total number of choices (i.e. harvest attempts) made by the subject."
+    )
+
+    n_patches_visited: NonNegativeInt = Field(description="Total number of patches visited during the session.")
+
+
+def _try_get_datastream_as_dataframe(datastream: SoftwareEvents) -> pd.DataFrame | None:
+    try:
+        datastream.load()
+        return datastream.data
+    except FileNotFoundError:
+        return None
+
+
+def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetrics:
+    dataset = vr_foraging_dataset(data_directory)
+
+    task_logic = dataset["Behavior"]["InputSchemas"]["TaskLogic"].load().data
+    if isinstance(task_logic, dict):
+        task_logic = AindVrForagingTaskLogic.model_validate(task_logic)
+
+    # we only care about the first block during the curriculum
+    unique_patches_indices = list(
+        set(
+            cast(int, p.state_index)
+            for p in task_logic.task_parameters.environment.blocks[0].environment_statistics.patches
+        )
+    )
+
+    total_water_consumed = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["GiveReward"])
+    choices = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ChoiceFeedback"])
+
+    visited_patches = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ActivePatch"])
+
+    visited_patches_per_index = (
+        (
+            visited_patches["data"]
+            .apply(lambda x: x["state_index"])
+            .value_counts()
+            .reindex(unique_patches_indices, fill_value=0)
+            .to_dict()
+        )
+        if visited_patches is not None
+        else {index: 0 for index in unique_patches_indices}
+    )
+
+    return DepletionCurriculumMetrics(
+        total_water_consumed=(total_water_consumed["data"].sum() if total_water_consumed is not None else 0.0)
+        * 1e-3,  # convert from uL to mL
+        n_choices=len(choices) if choices is not None else 0,
+        n_patches_visited=sum(visited_patches_per_index.values()),
+    )
