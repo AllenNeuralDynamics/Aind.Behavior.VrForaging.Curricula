@@ -21,6 +21,8 @@ class DepletionCurriculumMetrics(Metrics):
 
     n_patches_visited: NonNegativeInt = Field(description="Total number of patches visited during the session.")
 
+    last_stop_threshold: NonNegativeFloat = Field(description="The stop velocity threshold at the end of the session.")
+
 
 def _try_get_datastream_as_dataframe(datastream: SoftwareEvents) -> pd.DataFrame | None:
     try:
@@ -47,7 +49,9 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
 
     total_water_consumed = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["GiveReward"])
     choices = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ChoiceFeedback"])
-
+    stop_velocity_threshold = _try_get_datastream_as_dataframe(
+        dataset["Behavior"]["SoftwareEvents"]["StopVelocityThreshold"]
+    )
     visited_patches = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ActivePatch"])
 
     visited_patches_per_index = (
@@ -62,9 +66,12 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
         else {index: 0 for index in unique_patches_indices}
     )
 
+    assert (stop_velocity_threshold is not None) and (not stop_velocity_threshold.empty), "No stop velocity threshold data found!"
+
     return DepletionCurriculumMetrics(
         total_water_consumed=(total_water_consumed["data"].sum() if total_water_consumed is not None else 0.0)
         * 1e-3,  # convert from uL to mL
         n_choices=len(choices) if choices is not None else 0,
         n_patches_visited=sum(visited_patches_per_index.values()),
+        last_stop_threshold=stop_velocity_threshold["data"].iloc[-1],
     )
