@@ -68,7 +68,7 @@ def make_patch(
                 label=vr_task_logic.VirtualSiteLabels.INTERPATCH,
                 length_distribution=distributions.ExponentialDistribution(
                     distribution_parameters=distributions.ExponentialDistributionParameters(
-                        rate=1 / MEAN_INTERPATCH_LENGTH
+                        rate=1.0 / MEAN_INTERPATCH_LENGTH
                     ),
                     scaling_parameters=distributions.ScalingParameters(offset=MINIMUM_INTERPATCH_LENGTH),
                     truncation_parameters=distributions.TruncationParameters(
@@ -161,7 +161,7 @@ s_learn_to_stop = Stage(
                     parameters=vr_task_logic.NumericalUpdaterParameters(
                         initial_value=60,
                         on_success=0.995,
-                        minimum=10,
+                        minimum=8,
                         maximum=60,
                     ),
                 ),
