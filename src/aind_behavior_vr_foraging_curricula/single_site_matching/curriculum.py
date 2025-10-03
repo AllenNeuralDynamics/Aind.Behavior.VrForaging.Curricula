@@ -13,7 +13,7 @@ from aind_behavior_curriculum import (
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
 
 from ..cli import CurriculumCliArgs, CurriculumSuggestion, model_from_json_file
-from .metrics import DepletionCurriculumMetrics
+from .metrics import SingleSiteMatchingMetrics
 from .stages import (
     s_graduated_stage,
     s_learn_to_stop,
@@ -31,7 +31,7 @@ TModel = TypeVar("TModel", bound=pydantic.BaseModel)
 # ============================================================
 
 
-def st_s_learn_to_stop_to_s_graduated_stage(metrics: DepletionCurriculumMetrics) -> bool:
+def st_s_learn_to_stop_to_s_graduated_stage(metrics: SingleSiteMatchingMetrics) -> bool:
     if metrics.last_stop_duration_offset_updater is None or metrics.last_stop_threshold_updater is None:
         return False
 

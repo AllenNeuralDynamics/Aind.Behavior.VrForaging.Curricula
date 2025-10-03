@@ -12,7 +12,7 @@ from pydantic import Field, NonNegativeFloat, NonNegativeInt
 logger = logging.getLogger(__name__)
 
 
-class DepletionCurriculumMetrics(Metrics):
+class SingleSiteMatchingMetrics(Metrics):
     total_water_consumed: NonNegativeFloat = Field(description="Total water (in milliliters) consumed in the session.")
 
     n_choices: NonNegativeInt = Field(
@@ -37,7 +37,7 @@ def _try_get_datastream_as_dataframe(datastream: SoftwareEvents) -> pd.DataFrame
         return None
 
 
-def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetrics:
+def metrics_from_dataset(data_directory: os.PathLike) -> SingleSiteMatchingMetrics:
     dataset = vr_foraging_dataset(data_directory)
 
     task_logic = dataset["Behavior"]["InputSchemas"]["TaskLogic"].load().data
@@ -75,7 +75,7 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
         else {index: 0 for index in unique_patches_indices}
     )
 
-    return DepletionCurriculumMetrics(
+    return SingleSiteMatchingMetrics(
         total_water_consumed=(total_water_consumed["data"].sum() if total_water_consumed is not None else 0.0)
         * 1e-3,  # convert from uL to mL
         n_choices=len(choices) if choices is not None else 0,
