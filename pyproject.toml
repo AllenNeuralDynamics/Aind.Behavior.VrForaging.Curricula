@@ -1,13 +1,13 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.8.22"]
+build-backend = "uv_build"
 
 [project]
 name = "aind-behavior-vr-foraging-curricula"
 description = "A library of curricula for the VrForaging task."
 authors = [ {name = "Bruno Cruz", email = "bruno.cruz@alleninstitute.org"}]
 license = "MIT"
-version = "0.1.0"
+version = "0.0.0"
 requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3.11",
@@ -15,7 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Operating System :: Microsoft :: Windows",
 ]
-dynamic = ["readme"]
+readme = {file = "README.md", content-type = "text/markdown"}
 
 dependencies = [
     "aind-behavior-vr-foraging[data] @ git+https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.git@v0.6.0rc4",
@@ -23,7 +23,14 @@ dependencies = [
     "pydantic-settings",
 ]
 
-[project.optional-dependencies]
+[project.urls]
+Documentation = "https://allenneuraldynamics.github.io/Aind.Behavior.VrForaging.Curricula/"
+Repository = "https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.Curricula/"
+Issues = "https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.Curricula/issues"
+Changelog = "https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.Curricula/releases"
+
+
+[dependency-groups]
 
 dev = [
     'ruff',
@@ -40,17 +47,8 @@ docs = [
     'ruff',
 ]
 
-[project.urls]
-Documentation = "https://allenneuraldynamics.github.io/Aind.Behavior.VrForaging.Curricula/"
-Repository = "https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.Curricula/"
-Issues = "https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.Curricula/issues"
-Changelog = "https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.Curricula/releases"
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.setuptools.dynamic]
-readme = {file = "README.md", content-type = "text/markdown"}
+[tool.uv]
+default-groups = ['dev']
 
 [tool.ruff]
 line-length = 120
