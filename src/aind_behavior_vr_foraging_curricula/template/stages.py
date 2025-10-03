@@ -11,9 +11,13 @@ from aind_behavior_vr_foraging.task_logic import (
 from .metrics import VrForagingTemplateMetrics, metrics_from_dataset
 
 
-def NumericalUpdaterParametersHelper(initial_value, increment, decrement, minimum, maximum):
+def NumericalUpdaterParametersHelper(initial_value, on_success, on_failure, minimum, maximum):
     return vr_task_logic.NumericalUpdaterParameters(
-        initial_value=initial_value, increment=increment, decrement=decrement, minimum=minimum, maximum=maximum
+        initial_value=initial_value,
+        on_success=on_success,
+        on_failure=on_failure,
+        minimum=minimum,
+        maximum=maximum,
     )
 
 
@@ -27,7 +31,7 @@ updaters = {
         parameters=NumericalUpdaterParametersHelper(0, 0.005, 0, 0, 0.5),
     ),
     vr_task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD: vr_task_logic.NumericalUpdater(
-        operation=vr_task_logic.NumericalUpdaterOperation.OFFSETPERCENTAGE,
+        operation=vr_task_logic.NumericalUpdaterOperation.GAIN,
         parameters=NumericalUpdaterParametersHelper(40, 0, -0.25, 10, 40),
     ),
 }
@@ -109,7 +113,7 @@ reward_function = vr_task_logic.PatchRewardFunction(
     rule=vr_task_logic.RewardFunctionRule.ON_REWARD,
 )
 
-reset_function = vr_task_logic.OnThisPatchEntryFunction(
+reset_function = vr_task_logic.OnThisPatchEntryRewardFunction(
     available=vr_task_logic.SetValueFunction(value=vr_task_logic.scalar_value(0.1))
 )
 
