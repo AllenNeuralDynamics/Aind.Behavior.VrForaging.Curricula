@@ -43,7 +43,7 @@ jobs:
         run: uv run codespell
 
       - name: Run python unit tests
-        run: uv run pytest -cov aind_behavior_vr_foraging_curricula
+        run: uv run pytest
 
   # ╔───────────────────────────────────────────────────────────╗
   # │    ____ ___ ____ ____    ____      _                      │
