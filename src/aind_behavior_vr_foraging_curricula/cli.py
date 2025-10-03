@@ -93,8 +93,32 @@ class CurriculumCliArgs(BaseSettings):
             raise e
 
 
+class CurriculumInitCliArgs(BaseSettings):
+    curriculum: str = Field(description="The curriculum to enroll the model in.")
+    output: t.Optional[os.PathLike] = Field(
+        default=None,
+        description="Path to save the enrollment curriculum. If not provided, the curriculum will not be serialized to a file.",
+    )
+
+    def cli_cmd(self) -> None:
+        if self.curriculum not in _KNOWN_CURRICULA:
+            curricula_logger.error(f"Unknown curriculum: {self.curriculum}. Available: {list(_KNOWN_CURRICULA)}")
+            raise ValueError(f"Unknown curriculum: {self.curriculum}. Available: {list(_KNOWN_CURRICULA)}")
+
+        module = importlib.import_module(f"{__package__}.{self.curriculum}")
+        trainer: aind_behavior_curriculum.Trainer = getattr(module, "TRAINER")
+        init_state = trainer.create_enrollment()
+
+        if self.output is not None:
+            with open(Path(self.output), "w", encoding="utf-8") as file:
+                file.write(init_state.model_dump_json(indent=2))
+
+        curricula_logger.info(init_state.model_dump_json())
+
+
 class CurriculumAppCliArgs(BaseSettings, cli_prog_name="curriculum", cli_kebab_case=True):
     run: CliSubCommand[CurriculumCliArgs]
+    init: CliSubCommand[CurriculumInitCliArgs]
     version: CliSubCommand[Version]
     dsl_version: CliSubCommand[DslVersion]
     list: CliSubCommand[ListKnownCurricula]

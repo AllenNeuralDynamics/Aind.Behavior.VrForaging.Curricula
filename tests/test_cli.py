@@ -8,8 +8,8 @@ from pydantic_settings import CliApp
 
 from aind_behavior_vr_foraging_curricula import __version__ as version
 from aind_behavior_vr_foraging_curricula import curricula_logger
-from aind_behavior_vr_foraging_curricula.cli import _KNOWN_CURRICULA, CurriculumAppCliArgs
-from aind_behavior_vr_foraging_curricula.template import __test_placeholder
+from aind_behavior_vr_foraging_curricula.cli import _KNOWN_CURRICULA, CurriculumAppCliArgs, CurriculumInitCliArgs
+from aind_behavior_vr_foraging_curricula.template import TRAINER, __test_placeholder
 
 
 def test_known_curricula(caplog):
@@ -60,3 +60,19 @@ def test_curriculum_name_inference(caplog):
             assert len(error_msgs) == 0, f"Unexpected errors: {error_msgs}"
     finally:
         os.unlink(tmp_file_path)
+
+
+def test_cli_enroll(caplog):
+    curricula_logger.handlers.clear()  # the stdout pollutes the test
+    CliApp.run(
+        CurriculumInitCliArgs,
+        cli_args=[
+            "--curriculum",
+            "template",
+        ],
+    )
+    with caplog.at_level(logging.INFO, logger="aind_behavior_vr_foraging_curricula"):
+        msgs = [m.getMessage() for m in caplog.records if m.levelno >= logging.INFO]
+        assert len(msgs) > 0, "No info messages logged"
+        suggestion = msgs[-1]
+        assert TRAINER.create_enrollment() == TRAINER.trainer_state_model.model_validate_json(suggestion)
