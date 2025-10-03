@@ -6,12 +6,8 @@ from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
 from pydantic_settings import CliApp
 
 from aind_behavior_vr_foraging_curricula.cli import CurriculumAppCliArgs, CurriculumSuggestion
-from aind_behavior_vr_foraging_curricula.template import CURRICULUM_VERSION, __test_placeholder, run_curriculum
+from aind_behavior_vr_foraging_curricula.template import CURRICULUM_VERSION, __test_placeholder
 from aind_behavior_vr_foraging_curricula.template.curriculum import s_stage_b
-
-
-def dummy_runner(args):
-    return run_curriculum(args)
 
 
 def test_cli(caplog):
