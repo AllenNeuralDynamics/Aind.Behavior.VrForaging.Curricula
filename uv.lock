@@ -57,7 +57,7 @@ data = [
 
 [[package]]
 name = "aind-behavior-vr-foraging-curricula"
-version = "0.1.0"
+version = "0.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "aind-behavior-curriculum" },
@@ -65,7 +65,7 @@ dependencies = [
     { name = "pydantic-settings" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "codespell" },
     { name = "pytest" },
@@ -84,18 +84,23 @@ docs = [
 requires-dist = [
     { name = "aind-behavior-curriculum" },
     { name = "aind-behavior-vr-foraging", extras = ["data"], git = "https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.git?rev=v0.6.0rc4" },
-    { name = "codespell", marker = "extra == 'dev'" },
-    { name = "mkdocs", marker = "extra == 'docs'" },
-    { name = "mkdocs-material", marker = "extra == 'docs'" },
-    { name = "mkdocstrings", extras = ["python"], marker = "extra == 'docs'" },
     { name = "pydantic-settings" },
-    { name = "pymdown-extensions", marker = "extra == 'docs'" },
-    { name = "pytest", marker = "extra == 'dev'" },
-    { name = "pytest-cov", marker = "extra == 'dev'" },
-    { name = "ruff", marker = "extra == 'dev'" },
-    { name = "ruff", marker = "extra == 'docs'" },
 ]
-provides-extras = ["dev", "docs"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "codespell" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "ruff" },
+]
+docs = [
+    { name = "mkdocs" },
+    { name = "mkdocs-material" },
+    { name = "mkdocstrings", extras = ["python"] },
+    { name = "pymdown-extensions" },
+    { name = "ruff" },
+]
 
 [[package]]
 name = "annotated-types"
