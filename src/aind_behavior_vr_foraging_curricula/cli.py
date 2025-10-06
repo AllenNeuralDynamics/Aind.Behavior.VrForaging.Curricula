@@ -99,6 +99,10 @@ class CurriculumInitCliArgs(BaseSettings):
         default=None,
         description="Path to save the enrollment curriculum. If not provided, the curriculum will not be serialized to a file.",
     )
+    stage: t.Optional[str] = Field(
+        default=None,
+        description="If provided, the enrollment will be for a specific stage in the curriculum.",
+    )
 
     def cli_cmd(self) -> None:
         if self.curriculum not in _KNOWN_CURRICULA:
@@ -107,13 +111,31 @@ class CurriculumInitCliArgs(BaseSettings):
 
         module = importlib.import_module(f"{__package__}.{self.curriculum}")
         trainer: aind_behavior_curriculum.Trainer = getattr(module, "TRAINER")
-        init_state = trainer.create_enrollment()
+        if self.stage is None:
+            init_state = trainer.create_enrollment()
+        else:
+            try:
+                stages = trainer.curriculum.see_stages()
+                stage = [s for s in stages if s.name == self.stage][0]
+            except IndexError:
+                curricula_logger.error(f"Unknown stage: {self.stage}")
+                curricula_logger.error(self._print_available_stages(trainer.curriculum))
+                raise ValueError(f"Unknown stage: {self.stage}. Available: {[s.name for s in stages]}")
+            else:
+                init_state = trainer.create_trainer_state(
+                    stage=stage, is_on_curriculum=True, active_policies=stage.start_policies
+                )
 
         if self.output is not None:
             with open(Path(self.output), "w", encoding="utf-8") as file:
                 file.write(init_state.model_dump_json(indent=2))
 
         print(init_state.model_dump_json())
+
+    def _print_available_stages(self, curriculum: aind_behavior_curriculum.Curriculum) -> None:
+        print("Available stages:")
+        for stage in curriculum.see_stages():
+            print(f" - {stage.name}")
 
 
 class CurriculumAppCliArgs(BaseSettings, cli_prog_name="curriculum", cli_kebab_case=True):
