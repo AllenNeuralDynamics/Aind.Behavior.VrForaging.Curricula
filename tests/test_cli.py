@@ -69,3 +69,30 @@ def test_cli_enroll(capsys):
     json_output = captured.out.strip()
     assert len(json_output) > 0, "No JSON output to stdout"
     assert TRAINER.create_enrollment() == TRAINER.trainer_state_model.model_validate_json(json_output)
+
+
+def test_cli_enroll_with_stage(capsys):
+    CliApp.run(
+        CurriculumInitCliArgs,
+        cli_args=[
+            "--curriculum",
+            "template",
+            "--stage",
+            "stage_b",
+        ],
+    )
+
+    captured = capsys.readouterr()
+    json_output = captured.out.strip()
+    assert len(json_output) > 0, "No JSON output to stdout"
+    deserialized = TRAINER.trainer_state_model.model_validate_json(json_output)
+
+    assert deserialized.stage is not None, "Stage should not be None"
+    assert deserialized.stage.name == "stage_b"
+    assert deserialized.is_on_curriculum is True
+
+    stages = TRAINER.curriculum.see_stages()
+    stage_b = [s for s in stages if s.name == "stage_b"][0]
+    expected_policies = stage_b.start_policies
+    assert deserialized.stage.start_policies is not None
+    assert len(deserialized.stage.start_policies) == len(expected_policies)
