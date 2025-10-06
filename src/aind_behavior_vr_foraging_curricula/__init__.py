@@ -32,21 +32,29 @@ except PackageNotFoundError:
 __semver__ = pep440_to_semver(__version__)
 
 
-# Create a custom logger
+log_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
+# Configure package logger
+# Here, we will log all debug and above
 curricula_logger = logging.getLogger(__name__)
 curricula_logger.setLevel(logging.DEBUG)
 
-stdout_handler = logging.StreamHandler(sys.stdout)
-stdout_handler.setLevel(logging.INFO)
-
 stderr_handler = logging.StreamHandler(sys.stderr)
-stderr_handler.setLevel(logging.WARNING)
+stderr_handler.setLevel(logging.DEBUG)
+stderr_handler.setFormatter(log_formatter)
 
-stdout_handler.setFormatter(
-    logging.Formatter("%(message)s")
-)  # This makes the logs easier to parse from the client side
-stderr_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
-
-# Add handlers to the logger
-curricula_logger.addHandler(stdout_handler)
 curricula_logger.addHandler(stderr_handler)
+curricula_logger.propagate = False
+
+# Configure the root logger to send logs from other packages to stderr
+# Here, we will log all warnings and above
+root_logger = logging.getLogger()
+for handler in root_logger.handlers[:]:
+    root_logger.removeHandler(handler)
+
+root_stderr_handler = logging.StreamHandler(sys.stderr)
+root_stderr_handler.setLevel(logging.WARNING)
+root_stderr_handler.setFormatter(log_formatter)
+
+root_logger.addHandler(root_stderr_handler)
+root_logger.setLevel(logging.WARNING)
