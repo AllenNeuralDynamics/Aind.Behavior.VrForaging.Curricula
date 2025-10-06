@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 import aind_behavior_services.task_logic.distributions as distributions
 import aind_behavior_vr_foraging.task_logic as vr_task_logic
@@ -8,13 +8,6 @@ from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic, AindVr
 from .metrics import metrics_from_dataset
 from .policies import p_learn_to_stop
 
-MINIMUM_INTERPATCH_LENGTH = 50
-MEAN_INTERPATCH_LENGTH = 150
-MAXIMUM_INTERPATCH_LENGTH = 500
-INTERSITE_LENGTH = 50
-REWARDSITE_LENGTH = 50
-REWARD_AMOUNT = 3
-
 
 def make_patch(
     label: str,
@@ -22,6 +15,12 @@ def make_patch(
     odor_index: int,
     p_reward: float,
     p_replenish: float,
+    reward_amount: float = 5.0,
+    inter_site_length: float = 15,
+    reward_site_length: float = 40,
+    inter_patch_min_length: float = 50,
+    inter_patch_mean_length: float = 150,
+    inter_patch_max_length: float = 500,
 ):
     baiting_function = vr_task_logic.PersistentRewardFunction(
         rule=vr_task_logic.RewardFunctionRule.ON_PATCH_ENTRY,
@@ -50,7 +49,7 @@ def make_patch(
             vr_task_logic.PatchTerminatorOnRejection(count=vr_task_logic.scalar_value(1)),
         ],
         reward_specification=vr_task_logic.RewardSpecification(
-            amount=vr_task_logic.scalar_value(REWARD_AMOUNT),
+            amount=vr_task_logic.scalar_value(reward_amount),
             probability=vr_task_logic.scalar_value(p_reward),
             available=vr_task_logic.scalar_value(999999),
             delay=vr_task_logic.scalar_value(0.5),
@@ -68,24 +67,24 @@ def make_patch(
                 label=vr_task_logic.VirtualSiteLabels.INTERPATCH,
                 length_distribution=distributions.ExponentialDistribution(
                     distribution_parameters=distributions.ExponentialDistributionParameters(
-                        rate=1.0 / MEAN_INTERPATCH_LENGTH
+                        rate=1.0 / inter_patch_mean_length
                     ),
-                    scaling_parameters=distributions.ScalingParameters(offset=MINIMUM_INTERPATCH_LENGTH),
+                    scaling_parameters=distributions.ScalingParameters(offset=inter_patch_min_length),
                     truncation_parameters=distributions.TruncationParameters(
-                        min=MINIMUM_INTERPATCH_LENGTH,
-                        max=MAXIMUM_INTERPATCH_LENGTH,
+                        min=inter_patch_min_length,
+                        max=inter_patch_max_length,
                     ),
                 ),
             ),
             inter_site=vr_task_logic.VirtualSiteGenerator(
                 render_specification=vr_task_logic.RenderSpecification(contrast=0.5),
                 label=vr_task_logic.VirtualSiteLabels.INTERSITE,
-                length_distribution=vr_task_logic.scalar_value(INTERSITE_LENGTH),
+                length_distribution=vr_task_logic.scalar_value(inter_site_length),
             ),
             reward_site=vr_task_logic.VirtualSiteGenerator(
                 render_specification=vr_task_logic.RenderSpecification(contrast=0.5),
                 label=vr_task_logic.VirtualSiteLabels.REWARDSITE,
-                length_distribution=vr_task_logic.scalar_value(REWARDSITE_LENGTH),
+                length_distribution=vr_task_logic.scalar_value(reward_site_length),
             ),
         ),
     )
@@ -95,17 +94,42 @@ def make_block(
     p_rew: tuple[float, Optional[float], Optional[float]],
     p_replenish: tuple[float, Optional[float], Optional[float]],
     n_min_patches: int = 100,
+    make_patch_kwargs: Optional[dict[str, Any]] = None,
 ) -> vr_task_logic.Block:
-    patches = [make_patch(label="OdorA", state_index=0, odor_index=0, p_reward=p_rew[0], p_replenish=p_replenish[0])]
+    make_patch_kwargs = make_patch_kwargs or {}
+    patches = [
+        make_patch(
+            label="OdorA",
+            state_index=0,
+            odor_index=0,
+            p_reward=p_rew[0],
+            p_replenish=p_replenish[0],
+            **make_patch_kwargs,
+        )
+    ]
     if p_rew[1] is not None:
         assert p_replenish[1] is not None
         patches.append(
-            make_patch(label="OdorB", state_index=1, odor_index=1, p_reward=p_rew[1], p_replenish=p_replenish[1])
+            make_patch(
+                label="OdorB",
+                state_index=1,
+                odor_index=1,
+                p_reward=p_rew[1],
+                p_replenish=p_replenish[1],
+                **make_patch_kwargs,
+            )
         )
     if p_rew[2] is not None:
         assert p_replenish[2] is not None
         patches.append(
-            make_patch(label="OdorC", state_index=2, odor_index=2, p_reward=p_rew[2], p_replenish=p_replenish[2])
+            make_patch(
+                label="OdorC",
+                state_index=2,
+                odor_index=2,
+                p_reward=p_rew[2],
+                p_replenish=p_replenish[2],
+                **make_patch_kwargs,
+            )
         )
 
     per_p = 1.0 / len(patches)
@@ -167,7 +191,20 @@ s_learn_to_stop = Stage(
                 ),
             },
             environment=vr_task_logic.BlockStructure(
-                blocks=[make_block(p_rew=(1, 1, None), p_replenish=(1, 1, None), n_min_patches=100000)],
+                blocks=[
+                    make_block(
+                        p_rew=(1, 1, None),
+                        p_replenish=(1, 1, None),
+                        n_min_patches=100000,
+                        make_patch_kwargs={
+                            "inter_patch_min_length": 50,
+                            "inter_patch_mean_length": 120,
+                            "inter_patch_max_length": 150,
+                            "inter_site_length": 15,
+                            "reward_site_length": 40,
+                        },
+                    ),
+                ],
                 sampling_mode="Sequential",
             ),
             operation_control=make_operation_control(velocity_threshold=60),
@@ -177,6 +214,14 @@ s_learn_to_stop = Stage(
     metrics_provider=MetricsProvider(metrics_from_dataset),
 )
 
+_graduated_make_patch_kwargs = {
+    "inter_patch_min_length": 50,
+    "inter_patch_mean_length": 150,
+    "inter_patch_max_length": 500,
+    "inter_site_length": 15,
+    "reward_site_length": 40,
+}
+
 s_graduated_stage = Stage(
     name="graduated_stage",
     task=AindVrForagingTaskLogic(
@@ -185,11 +230,36 @@ s_graduated_stage = Stage(
             rng_seed=None,
             environment=vr_task_logic.BlockStructure(
                 blocks=[
-                    make_block(p_rew=(0.8, 0.2, None), p_replenish=(0.4, 0.1, None), n_min_patches=100),
-                    make_block(p_rew=(0.2, 0.8, None), p_replenish=(0.1, 0.4, None), n_min_patches=100),
-                    make_block(p_rew=(0.5, 0.5, None), p_replenish=(0.2, 0.2, None), n_min_patches=100),
-                    make_block(p_rew=(0.65, 0.35, None), p_replenish=(0.325, 0.175, None), n_min_patches=100),
-                    make_block(p_rew=(0.35, 0.15, None), p_replenish=(0.175, 0.325, None), n_min_patches=100),
+                    make_block(
+                        p_rew=(0.8, 0.2, None),
+                        p_replenish=(0.4, 0.1, None),
+                        n_min_patches=100,
+                        make_patch_kwargs=_graduated_make_patch_kwargs,
+                    ),
+                    make_block(
+                        p_rew=(0.2, 0.8, None),
+                        p_replenish=(0.1, 0.4, None),
+                        n_min_patches=100,
+                        make_patch_kwargs=_graduated_make_patch_kwargs,
+                    ),
+                    make_block(
+                        p_rew=(0.5, 0.5, None),
+                        p_replenish=(0.2, 0.2, None),
+                        n_min_patches=100,
+                        make_patch_kwargs=_graduated_make_patch_kwargs,
+                    ),
+                    make_block(
+                        p_rew=(0.65, 0.35, None),
+                        p_replenish=(0.325, 0.175, None),
+                        n_min_patches=100,
+                        make_patch_kwargs=_graduated_make_patch_kwargs,
+                    ),
+                    make_block(
+                        p_rew=(0.35, 0.15, None),
+                        p_replenish=(0.175, 0.325, None),
+                        n_min_patches=100,
+                        make_patch_kwargs=_graduated_make_patch_kwargs,
+                    ),
                 ],
                 sampling_mode="Random",
             ),
