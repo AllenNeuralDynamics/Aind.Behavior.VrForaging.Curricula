@@ -24,23 +24,23 @@ class Version(RootModel):
     root: t.Any
 
     def cli_cmd(self) -> None:
-        curricula_logger.info(__version__)
+        print(__version__)
 
 
 class DslVersion(RootModel):
     root: t.Any
 
     def cli_cmd(self) -> None:
-        curricula_logger.info(aind_behavior_curriculum.__version__)
+        print(aind_behavior_curriculum.__version__)
 
 
 class ListKnownCurricula(RootModel):
     root: t.Any
 
     def cli_cmd(self) -> None:
-        curricula_logger.info("Available curricula:")
+        print("Available curricula:")
         for curriculum in _KNOWN_CURRICULA:
-            curricula_logger.info(f" - {curriculum}")
+            print(f" - {curriculum}")
 
 
 class CurriculumCliArgs(BaseSettings):
@@ -82,7 +82,7 @@ class CurriculumCliArgs(BaseSettings):
             suggestion.dsl_version = aind_behavior_curriculum.__version__
 
             if not self.mute_suggestion:
-                curricula_logger.info(suggestion.model_dump_json())
+                print(suggestion.model_dump_json())
 
             if self.output_suggestion is not None:
                 with open(Path(self.output_suggestion) / "suggestion.json", "w", encoding="utf-8") as file:
@@ -113,7 +113,7 @@ class CurriculumInitCliArgs(BaseSettings):
             with open(Path(self.output), "w", encoding="utf-8") as file:
                 file.write(init_state.model_dump_json(indent=2))
 
-        curricula_logger.info(init_state.model_dump_json())
+        print(init_state.model_dump_json())
 
 
 class CurriculumAppCliArgs(BaseSettings, cli_prog_name="curriculum", cli_kebab_case=True):
