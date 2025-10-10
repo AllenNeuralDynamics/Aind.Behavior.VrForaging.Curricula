@@ -32,8 +32,8 @@ def init_state() -> TrainerState[Any]:
 def fail_metrics() -> SingleSiteMatchingMetrics:
     return SingleSiteMatchingMetrics(
         total_water_consumed=0.0,
-        n_choices=0,
         n_patches_visited=0,
+        n_patches_seen=0,
         last_stop_threshold_updater=0.5,
         last_stop_duration_offset_updater=0.5,
     )
@@ -43,8 +43,8 @@ def fail_metrics() -> SingleSiteMatchingMetrics:
 def ok_metrics() -> SingleSiteMatchingMetrics:
     return SingleSiteMatchingMetrics(
         total_water_consumed=1.0,
-        n_choices=150,
-        n_patches_visited=300,
+        n_patches_visited=150,
+        n_patches_seen=300,
         last_stop_threshold_updater=8,
         last_stop_duration_offset_updater=0.6,
     )
@@ -54,8 +54,8 @@ class TestCurriculumProgression:
     def test_p_learn_to_stop(self, init_state: TrainerState):
         metrics = SingleSiteMatchingMetrics(
             total_water_consumed=1.0,
-            n_choices=200,
-            n_patches_visited=300,
+            n_patches_visited=200,
+            n_patches_seen=300,
             last_stop_threshold_updater=10.0,
             last_stop_duration_offset_updater=0.5,
         )

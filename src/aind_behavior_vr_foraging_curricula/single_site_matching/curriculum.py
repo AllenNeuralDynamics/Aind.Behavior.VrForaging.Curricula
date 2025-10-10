@@ -38,8 +38,8 @@ def st_s_learn_to_stop_to_s_graduated_stage(metrics: SingleSiteMatchingMetrics) 
     if (
         (metrics.last_stop_threshold_updater <= 8)
         and (metrics.last_stop_duration_offset_updater >= 0.6)
-        and (metrics.n_patches_visited >= 300)
-        and (metrics.n_choices >= 150)
+        and (metrics.n_patches_seen >= 300)
+        and (metrics.n_patches_visited >= 150)
     ):
         return True
     return False
@@ -85,4 +85,5 @@ def run_curriculum(args: CurriculumCliArgs) -> CurriculumSuggestion[TrainerState
     metrics: aind_behavior_curriculum.Metrics
     trainer_state = trainer_state_from_file(args.input_trainer_state)
     metrics = metrics_from_dataset_path(args.data_directory, trainer_state)
-    return CurriculumSuggestion(trainer_state=trainer_state, metrics=metrics)
+    trainer_state = TRAINER.evaluate(trainer_state, metrics)
+    return CurriculumSuggestion(trainer_state=trainer_state, metrics=metrics, version=CURRICULUM_VERSION)
