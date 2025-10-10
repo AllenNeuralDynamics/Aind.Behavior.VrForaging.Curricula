@@ -85,4 +85,5 @@ def run_curriculum(args: CurriculumCliArgs) -> CurriculumSuggestion[TrainerState
     metrics: aind_behavior_curriculum.Metrics
     trainer_state = trainer_state_from_file(args.input_trainer_state)
     metrics = metrics_from_dataset_path(args.data_directory, trainer_state)
-    return CurriculumSuggestion(trainer_state=trainer_state, metrics=metrics)
+    trainer_state = TRAINER.evaluate(trainer_state, metrics)
+    return CurriculumSuggestion(trainer_state=trainer_state, metrics=metrics, version=CURRICULUM_VERSION)
