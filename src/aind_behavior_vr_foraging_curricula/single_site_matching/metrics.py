@@ -15,11 +15,11 @@ logger = logging.getLogger(__name__)
 class SingleSiteMatchingMetrics(Metrics):
     total_water_consumed: NonNegativeFloat = Field(description="Total water (in milliliters) consumed in the session.")
 
-    n_choices: NonNegativeInt = Field(
+    n_patches_visited: NonNegativeInt = Field(
         description="Total number of choices (i.e. harvest attempts) made by the subject."
     )
 
-    n_patches_visited: NonNegativeInt = Field(description="Total number of patches visited during the session.")
+    n_patches_seen: NonNegativeInt = Field(description="Total number of patches seen during the session.")
 
     last_stop_threshold_updater: NonNegativeFloat | None = Field(
         description="The stop velocity threshold at the end of the session."
@@ -78,8 +78,8 @@ def metrics_from_dataset(data_directory: os.PathLike) -> SingleSiteMatchingMetri
     return SingleSiteMatchingMetrics(
         total_water_consumed=(total_water_consumed["data"].sum() if total_water_consumed is not None else 0.0)
         * 1e-3,  # convert from uL to mL
-        n_choices=len(choices) if choices is not None else 0,
-        n_patches_visited=sum(visited_patches_per_index.values()),
+        n_patches_visited=len(choices) if choices is not None else 0,
+        n_patches_seen=sum(visited_patches_per_index.values()),
         last_stop_threshold_updater=stop_velocity_threshold["data"].iloc[-1]
         if stop_velocity_threshold is not None
         else None,
