@@ -15,6 +15,7 @@ def make_patch(
     odor_index: int,
     p_reward: float,
     p_replenish: float,
+    stop_duration: float = 0.5,
     reward_amount: float = 5.0,
     inter_site_length: float = 15,
     reward_site_length: float = 40,
@@ -55,7 +56,7 @@ def make_patch(
             delay=vr_task_logic.scalar_value(0.5),
             operant_logic=vr_task_logic.OperantLogic(
                 is_operant=False,
-                stop_duration=0.5,
+                stop_duration=stop_duration,
                 time_to_collect_reward=100000,
                 grace_distance_threshold=10,
             ),
@@ -215,11 +216,13 @@ s_learn_to_stop = Stage(
 )
 
 _graduated_make_patch_kwargs = {
-    "inter_patch_min_length": 50,
-    "inter_patch_mean_length": 150,
-    "inter_patch_max_length": 500,
+    "inter_patch_min_length": 30,
+    "inter_patch_mean_length": 60,
+    "inter_patch_max_length": 180,
     "inter_site_length": 15,
-    "reward_site_length": 40,
+    "reward_site_length": 50,
+    "reward_amount": 5.0,
+    "stop_duration": 1,
 }
 
 s_graduated_stage = Stage(
@@ -244,19 +247,7 @@ s_graduated_stage = Stage(
                     ),
                     make_block(
                         p_rew=(0.5, 0.5, None),
-                        p_replenish=(0.2, 0.2, None),
-                        n_min_patches=100,
-                        make_patch_kwargs=_graduated_make_patch_kwargs,
-                    ),
-                    make_block(
-                        p_rew=(0.65, 0.35, None),
-                        p_replenish=(0.325, 0.175, None),
-                        n_min_patches=100,
-                        make_patch_kwargs=_graduated_make_patch_kwargs,
-                    ),
-                    make_block(
-                        p_rew=(0.35, 0.15, None),
-                        p_replenish=(0.175, 0.325, None),
+                        p_replenish=(0.25, 0.25, None),
                         n_min_patches=100,
                         make_patch_kwargs=_graduated_make_patch_kwargs,
                     ),
