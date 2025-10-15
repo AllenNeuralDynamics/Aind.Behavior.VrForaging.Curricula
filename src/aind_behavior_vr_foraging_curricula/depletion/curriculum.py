@@ -33,7 +33,6 @@ TModel = TypeVar("TModel", bound=pydantic.BaseModel)
 # Stage transitions
 # ============================================================
 
-
 def st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0(metrics: DepletionCurriculumMetrics) -> bool:
     if metrics.last_reward_site_length is None:
         raise ValueError("last_reward_site_length is None")
@@ -41,7 +40,7 @@ def st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0(metrics:
         raise ValueError("last_stop_duration is None")
     return (
         (metrics.n_reward_sites_visited > 200)
-        and (metrics.n_choices > 100)
+        and (metrics.n_choices > 150)
         and (metrics.last_reward_site_length >= 50)
         and (metrics.last_stop_duration >= 0.4)
     )
@@ -50,21 +49,21 @@ def st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0(metrics:
 def st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1(
     metrics: DepletionCurriculumMetrics,
 ) -> bool:
-    return metrics.n_patches_visited > 30
+    return metrics.n_patches_visited > 20
 
 
 def st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0(
     metrics: DepletionCurriculumMetrics,
 ) -> bool:
-    return metrics.n_patches_visited <= 30
+    return metrics.n_patches_visited <= 20
 
 
 def st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded(metrics: DepletionCurriculumMetrics) -> bool:
-    return metrics.n_patches_visited > 30
+    return metrics.n_patches_visited > 20
 
 
 def st_s_stage_all_odors_rewarded_s_stage_graduation(metrics: DepletionCurriculumMetrics) -> bool:
-    return metrics.n_patches_visited_per_patch[0] > 30 and metrics.n_patches_visited_per_patch[1] > 30
+    return metrics.n_patches_visited_per_patch[0] > 15 and metrics.n_patches_visited_per_patch[1] > 15
 
 
 # ============================================================
@@ -102,7 +101,9 @@ CURRICULUM.add_stage_transition(
 )
 
 CURRICULUM.add_stage_transition(
-    s_stage_all_odors_rewarded, s_stage_graduation, StageTransition(st_s_stage_all_odors_rewarded_s_stage_graduation)
+    s_stage_all_odors_rewarded, 
+    s_stage_graduation, 
+    StageTransition(st_s_stage_all_odors_rewarded_s_stage_graduation)
 )
 
 # ==============================================================================
@@ -125,9 +126,9 @@ def metrics_from_dataset_path(dataset_path: Union[str, os.PathLike], trainer_sta
     metrics_provider = stage.metrics_provider
     return metrics_provider.callable(dataset_path)
 
-
 def run_curriculum(args: CurriculumCliArgs) -> CurriculumSuggestion[TrainerState[Any], Any]:
     metrics: aind_behavior_curriculum.Metrics
     trainer_state = trainer_state_from_file(args.input_trainer_state)
     metrics = metrics_from_dataset_path(args.data_directory, trainer_state)
-    return CurriculumSuggestion(trainer_state=trainer_state, metrics=metrics)
+    trainer_state = TRAINER.evaluate(trainer_state, metrics)
+    return CurriculumSuggestion(trainer_state=trainer_state, metrics=metrics, version=CURRICULUM_VERSION)
