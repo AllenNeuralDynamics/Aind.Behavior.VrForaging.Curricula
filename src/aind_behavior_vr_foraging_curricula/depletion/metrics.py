@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 class DepletionCurriculumMetrics(Metrics):
     total_water_consumed: NonNegativeFloat = Field(description="Total water (in milliliters) consumed in the session.")
 
-    n_reward_sites_visited: NonNegativeInt = Field(
-        description="Number of reward sites visited during the session.",
+    n_reward_sites_travelled: NonNegativeInt = Field(
+        description="Number of reward sites travelled during the session.",
     )
 
     n_choices: NonNegativeInt = Field(
@@ -35,7 +35,6 @@ class DepletionCurriculumMetrics(Metrics):
     last_reward_site_length: NonNegativeFloat | None = Field(
         description="Length (in cm) of the reward site currently implemented."
     )
-
 
 def _try_get_datastream_as_dataframe(datastream: SoftwareEvents) -> pd.DataFrame | None:
     try:
@@ -62,44 +61,48 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
 
     total_water_consumed = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["GiveReward"])
     choices = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ChoiceFeedback"])
+    patches = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ActivePatch"])
 
-    visited_patches = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ActivePatch"])
-
-    visited_patches_per_index = (
-        (
-            visited_patches["data"]
-            .apply(lambda x: x["state_index"])
-            .value_counts()
-            .reindex(unique_patches_indices, fill_value=0)
-            .to_dict()
+    patches_visited = (
+        pd.concat([
+            choices[['name']], 
+            patches.assign(
+                label=pd.json_normalize(patches['data'])['state_index'].values,
+                patch_number=range(1, len(patches) + 1)
+            )[["patch_number", "label"]]
+        ])
+        .sort_index()
+        .assign(
+            label=lambda df: df["label"].shift(1),
+            patch_number=lambda df: df["patch_number"].shift(1)
         )
-        if visited_patches is not None
-        else {index: 0 for index in unique_patches_indices}
+        .loc[lambda df: ~df["name"].isna()]
     )
+
+    n_patches_visited_per_patch = patches_visited.groupby("label").patch_number.nunique().fillna(0).astype(int).to_dict()
 
     sites_visited = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ActiveSite"])
 
     if sites_visited is None:
-        reward_sites_visited = pd.DataFrame()
+        reward_sites_travelled = pd.DataFrame()
     else:
-        reward_sites_visited = sites_visited[sites_visited["data"].apply(lambda x: x["label"] == "RewardSite")]
+        reward_sites_travelled = sites_visited[sites_visited["data"].apply(lambda x: x["label"] == "RewardSite")]
 
-    if n_reward_sites_visited := len(reward_sites_visited) > 0:
-        last_stop_duration = reward_sites_visited["data"].iloc[-1]["reward_specification"]["operant_logic"][
+    if n_reward_sites_travelled := len(reward_sites_travelled) > 0:
+        last_stop_duration = reward_sites_travelled["data"].iloc[-1]["reward_specification"]["operant_logic"][
             "stop_duration"
         ]
-        last_reward_site_length = reward_sites_visited["data"].iloc[-1]["length"]
+        last_reward_site_length = reward_sites_travelled["data"].iloc[-1]["length"]
     else:
         last_stop_duration = None
         last_reward_site_length = None
 
-    return DepletionCurriculumMetrics(
-        total_water_consumed=(total_water_consumed["data"].sum() if total_water_consumed is not None else 0.0)
-        * 1e-3,  # convert from uL to mL
+    DepletionCurriculumMetrics(
+        total_water_consumed=(total_water_consumed["data"].sum() if total_water_consumed is not None else 0.0),  
         n_choices=len(choices) if choices is not None else 0,
-        n_reward_sites_visited=n_reward_sites_visited,
+        n_reward_sites_travelled=len(reward_sites_travelled),
         last_stop_duration=last_stop_duration,
         last_reward_site_length=last_reward_site_length,
-        n_patches_visited=sum(visited_patches_per_index.values()),
-        n_patches_visited_per_patch=visited_patches_per_index,
+        n_patches_visited=sum(n_patches_visited_per_patch.values()),
+        n_patches_visited_per_patch={int(k): int(v) for k, v in n_patches_visited_per_patch.items()},
     )
