@@ -39,7 +39,7 @@ def st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0(metrics:
     if metrics.last_stop_duration is None:
         raise ValueError("last_stop_duration is None")
     return (
-        (metrics.n_reward_sites_visited > 200)
+        (metrics.n_reward_sites_travelled > 200)
         and (metrics.n_choices > 150)
         and (metrics.last_reward_site_length >= 50)
         and (metrics.last_stop_duration >= 0.4)
@@ -63,7 +63,8 @@ def st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded(metrics: De
 
 
 def st_s_stage_all_odors_rewarded_s_stage_graduation(metrics: DepletionCurriculumMetrics) -> bool:
-    return metrics.n_patches_visited_per_patch[0] > 15 and metrics.n_patches_visited_per_patch[1] > 15
+    patches = metrics.n_patches_visited_per_patch
+    return patches.get(0, 0) > 15 and patches.get(1, 0) > 15
 
 
 # ============================================================
