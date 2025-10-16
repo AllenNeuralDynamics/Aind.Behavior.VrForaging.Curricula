@@ -103,7 +103,7 @@ def ExponentialProbabilityRewardCount(amount_drop: int = 5,
         rule=task_logic.RewardFunctionRule[rule],
     )
 
-    reset_function = task_logic.OnThisPatchEntryFunction(
+    reset_function = task_logic.OnThisPatchEntryRewardFunction(
         available=task_logic.SetValueFunction(value=task_logic.scalar_value(available_water))
     )
 
@@ -160,7 +160,7 @@ def CountUntilDepleted(
         rule=task_logic.RewardFunctionRule[rule],
     )
 
-    reset_function = task_logic.OnThisPatchEntryFunction(
+    reset_function = task_logic.OnThisPatchEntryRewardFunction(
         available=task_logic.SetValueFunction(value=task_logic.scalar_value(available_water))
     )
 
