@@ -58,11 +58,11 @@ s_stage_one_odor_no_depletion = Stage(
                                         available=task_logic.scalar_value(9999),
                                         reward_function=[],
                                     ),
-                                    patch_virtual_sites_generator=helpers.make_virtualsites (rewardsite = 20, 
-                                                                                             interpatch_min = 50, 
-                                                                                             interpatch_max = 100,
-                                                                                             intersite_min = 20,
-                                                                                             intersite_max = 40)
+                                    patch_virtual_sites_generator=helpers.make_virtualsites(rewardsite = 20, 
+                                                                                             interpatch_min = 25, 
+                                                                                             interpatch_max = 75,
+                                                                                             intersite_min = 10,
+                                                                                             intersite_max = 30)
                                 )
                             ]
                         ),
