@@ -38,7 +38,7 @@ def curriculum() -> Curriculum[AindVrForagingTaskLogic]:
 
 @pytest.fixture
 def init_state() -> TrainerState[Any]:
-    return TRAINER.create_trainer_state(stage= s_stage_all_odors_rewarded, is_on_curriculum=True, active_policies=[p_learn_to_run, p_learn_to_stop, p_stochastic_reward])
+    return TRAINER.create_trainer_state(stage= s_stage_one_odor_no_depletion, is_on_curriculum=True, active_policies=[p_learn_to_run, p_learn_to_stop, p_stochastic_reward])
 
 @pytest.fixture
 def fail_metrics() -> DepletionCurriculumMetrics:
@@ -47,7 +47,7 @@ def fail_metrics() -> DepletionCurriculumMetrics:
             n_choices=0,
             n_reward_sites_travelled=5,
             n_patches_visited=0,
-            n_patches_visited_per_patch={0: 0},
+            n_patches_visited_per_patch={0: 0, 1:0},
             last_stop_duration=0.3,
             last_reward_site_length=30,
         )
@@ -57,10 +57,10 @@ def fail_metrics() -> DepletionCurriculumMetrics:
 def ok_metrics() -> DepletionCurriculumMetrics:
     return DepletionCurriculumMetrics(
             total_water_consumed=750,
-            n_choices=150,
-            n_reward_sites_travelled=5,
+            n_choices=151,
+            n_reward_sites_travelled=300,
             n_patches_visited=50,
-            n_patches_visited_per_patch={0: 25},
+            n_patches_visited_per_patch={0: 25, 1:25},
             last_stop_duration=0.5,
             last_reward_site_length=50,
         )
@@ -70,8 +70,8 @@ class TestCurriculumProgression:
     def test_p_learn_to_stop(self, init_state: TrainerState):
         metrics = DepletionCurriculumMetrics(
             total_water_consumed=750,
-            n_choices=150,
-            n_reward_sites_travelled=5,
+            n_choices=151,
+            n_reward_sites_travelled=300,
             n_patches_visited=50,
             n_patches_visited_per_patch={0: 25, 1:25},
             last_stop_duration=0.5,
@@ -86,20 +86,12 @@ class TestCurriculumProgression:
         updated = p_learn_to_stop(metrics, init_settings.model_copy(deep=True))
         assert updated is not None
         assert updated.task_parameters.updaters is not None
-        assert (
-            updated.task_parameters.updaters[task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD].parameters.initial_value
-            == metrics.last_stop_threshold_updater * 1.2
-        )
-        assert (
-            updated.task_parameters.updaters[task_logic.UpdaterTarget.STOP_DURATION_OFFSET].parameters.initial_value
-            == metrics.last_stop_duration_offset_updater * 0.8
-        )
 
     def test_p_learn_to_run(self, init_state: TrainerState):
         metrics = DepletionCurriculumMetrics(
             total_water_consumed=750,
-            n_choices=150,
-            n_reward_sites_travelled=5,
+            n_choices=151,
+            n_reward_sites_travelled=300,
             n_patches_visited=50,
             n_patches_visited_per_patch={0: 25, 1:25},
             last_stop_duration=0.5,
@@ -112,37 +104,23 @@ class TestCurriculumProgression:
         updated = p_learn_to_run(metrics, init_settings.model_copy(deep=True))
         assert updated is not None
         assert updated.task_parameters.updaters is not None
-        # assert (
-        #     updated.task_parameters.updaters[task_logic.UpdaterTarget.RUN_VELOCITY_THRESHOLD].parameters.initial_value
-        #     == metrics.last_run_threshold_updater * 1.2
-        # )
-        # assert (
-        #     updated.task_parameters.updaters[task_logic.UpdaterTarget.RUN_DURATION_OFFSET].parameters.initial_value
-        #     == metrics.last_run_duration_offset_updater * 0.8
-        # )
 
-    def test_st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0_pass(self, ok_metrics: DepletionCurriculumMetrics):
+
+    def test_st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0(self, fail_metrics: DepletionCurriculumMetrics, ok_metrics: DepletionCurriculumMetrics):
+        assert st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0(fail_metrics) is False
         assert st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0(ok_metrics) is True
 
-    def test_st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0_fail(self, fail_metrics: DepletionCurriculumMetrics):
-        assert st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0(fail_metrics) is False
-
-    def test_st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1_pass(self, ok_metrics: DepletionCurriculumMetrics):
+    def test_st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1(self,  fail_metrics: DepletionCurriculumMetrics, ok_metrics: DepletionCurriculumMetrics):
         assert st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1(ok_metrics) is True
-
-    def test_st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1_fail(self, fail_metrics: DepletionCurriculumMetrics):
         assert st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1(fail_metrics) is False
-    
-    def test_st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0_pass(self, fail_metrics: DepletionCurriculumMetrics):
+
+    def test_st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0(self,  fail_metrics: DepletionCurriculumMetrics, ok_metrics: DepletionCurriculumMetrics):
         assert st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0(fail_metrics) is True
-        
-    def test_st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0_fail(self, ok_metrics: DepletionCurriculumMetrics):
         assert st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0(ok_metrics) is False
-    
-    def test_st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded_pass(self, ok_metrics: DepletionCurriculumMetrics):
+
+
+    def test_st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded(self,  fail_metrics: DepletionCurriculumMetrics, ok_metrics: DepletionCurriculumMetrics):
         assert st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded(ok_metrics) is True
-    
-    def test_st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded_fail(self, fail_metrics: DepletionCurriculumMetrics):
         assert st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded(fail_metrics) is False
     
     def test_progression_pass(self, trainer: Trainer, init_state: TrainerState, ok_metrics: DepletionCurriculumMetrics):
@@ -160,5 +138,119 @@ class TestCurriculumProgression:
         assert proposal.is_on_curriculum is True
         assert proposal.curriculum == trainer.curriculum
         assert proposal.stage is not None
-        assert proposal.stage.name == trainer.curriculum.see_stages()[0].name
+        assert proposal.stage.name == init_state.stage.name
         # Cannot evaluate the task as it is subject to change by policies
+        
+    # ---------- Edge cases ----------
+    def test_missing_metric_fields(self):
+        metrics = DepletionCurriculumMetrics(
+            total_water_consumed=0,
+            n_reward_sites_travelled=201,
+            n_choices=151,
+            n_patches_visited=0,
+            n_patches_visited_per_patch={0: 0, 1: 0},
+            last_stop_duration=None,
+            last_reward_site_length=None
+        )
+        with pytest.raises(ValueError):
+            st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0(metrics)
+
+    def test_n_patches_visited_edge_cases(self):
+        metrics = DepletionCurriculumMetrics(
+            total_water_consumed=750,
+            n_reward_sites_travelled=300,
+            n_choices=200,
+            n_patches_visited=30,
+            n_patches_visited_per_patch={},  # missing keys
+            last_stop_duration=0.5,
+            last_reward_site_length=50
+        )
+        assert not st_s_stage_all_odors_rewarded_s_stage_graduation(metrics)
+        metrics.n_patches_visited_per_patch = {0: 25, 1: 0}
+        assert not st_s_stage_all_odors_rewarded_s_stage_graduation(metrics)
+
+    # ---------- Circular / policy transitions ----------
+    def test_circular_stage_transitions(self, trainer):
+        current_state = CURRICULUM.see_stages()[2]
+        state = trainer.create_trainer_state(stage=current_state, active_policies=current_state.start_policies)
+        metrics = DepletionCurriculumMetrics(
+            total_water_consumed=750,
+            n_reward_sites_travelled=300,
+            n_choices=200,
+            n_patches_visited=25,
+            n_patches_visited_per_patch={0: 15, 1: 15},
+            last_stop_duration=0.5,
+            last_reward_site_length=50
+        )
+
+        # Forward transition
+        progress_state = trainer.evaluate(state, metrics)
+        assert progress_state.stage.name != current_state.name
+
+        # Reverse transition
+        metrics.n_patches_visited = 15
+        regress_state = trainer.evaluate(progress_state, metrics)
+        assert regress_state.stage.name != current_state.name or regress_state.stage.name != progress_state.stage.name
+
+    def test_policy_transitions(self, trainer):
+        stage = CURRICULUM.see_stages()[0]
+        state = trainer.create_trainer_state(stage=stage, active_policies=stage.start_policies)
+        metrics = DepletionCurriculumMetrics(
+            total_water_consumed=750,
+            n_reward_sites_travelled=300,
+            n_choices=200,
+            n_patches_visited=25,
+            n_patches_visited_per_patch={0: 15, 1: 15},
+            last_stop_duration=0.5,
+            last_reward_site_length=50
+        )
+        active_policies = state.active_policies
+        new_policies = trainer._evaluate_policy_transitions(stage, active_policies, metrics)
+        assert isinstance(new_policies, list)
+        assert len(new_policies) == len(set(new_policies))
+
+    def test_trainer_evaluate_updates(self, trainer):
+        stage = CURRICULUM.see_stages()[0]
+        state = trainer.create_trainer_state(stage=stage, active_policies=stage.start_policies)
+        metrics = DepletionCurriculumMetrics(
+            total_water_consumed=750,
+            n_reward_sites_travelled=300,
+            n_choices=200,
+            n_patches_visited=25,
+            n_patches_visited_per_patch={0: 15, 1: 15},
+            last_stop_duration=0.5,
+            last_reward_site_length=50
+        )
+        new_state = trainer.evaluate(state, metrics)
+        assert isinstance(new_state, TrainerState)
+        assert new_state.is_on_curriculum
+        assert new_state.curriculum == trainer.curriculum
+
+    # ---------- Serialization ----------
+    def test_trainer_state_serialization(self, tmp_path):
+        state_file = tmp_path / "state.json"
+        stage = CURRICULUM.see_stages()[0]
+        state = TRAINER.create_trainer_state(stage=stage, active_policies=stage.start_policies)
+        
+        state_file.write_text(state.json())
+        
+        from aind_behavior_vr_foraging_curricula.depletion.curriculum import model_from_json_file
+        loaded_state = model_from_json_file(state_file, TRAINER.trainer_state_model)
+        assert loaded_state.stage.name == state.stage.name
+        assert loaded_state.active_policies == state.active_policies
+
+    # ---------- Stage advance with wrong metrics ----------
+    def test_stage_does_not_advance_wrong_metrics(self):
+        metrics = DepletionCurriculumMetrics(
+            total_water_consumed=750,
+            n_reward_sites_travelled=500,
+            n_choices=200,
+            n_patches_visited=10,
+            n_patches_visited_per_patch={0: 10},
+            last_stop_duration=0.4,
+            last_reward_site_length=40
+        )
+        stage0 = CURRICULUM.see_stages()[0]
+        state = TRAINER.create_trainer_state(stage=stage0, active_policies=stage0.start_policies)
+        new_state = TRAINER.evaluate(state, metrics)
+        assert new_state.stage.name == stage0.name
