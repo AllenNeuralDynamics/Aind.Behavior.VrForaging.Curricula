@@ -34,7 +34,7 @@ updaters = {
                         maximum=60,
                     ),
                 ),
-            },
+            }
 
 s_stage_one_odor_no_depletion = Stage(
     name="one_odor_no_depletion",
@@ -73,7 +73,7 @@ s_stage_one_odor_no_depletion = Stage(
         ),
     ),
     start_policies=[Policy(x) for x in [p_learn_to_run, p_learn_to_stop, p_stochastic_reward]],
-    metrics_provider=MetricsProvider(metrics_from_dataset),
+    metrics_provider=MetricsProvider(metrics_from_dataset)
 )
 
 s_stage_one_odor_w_depletion_parameters = AindVrForagingTaskParameters(
@@ -108,52 +108,55 @@ s_stage_one_odor_w_depletion_day_0 = Stage(
         stage_name="one_odor_no_depletion_day_0",
         task_parameters=s_stage_one_odor_w_depletion_parameters,
     ),
-    metrics_provider=MetricsProvider(metrics_from_dataset),
+    metrics_provider=MetricsProvider(metrics_from_dataset)
 )
 
 s_stage_one_odor_w_depletion_day_1 = Stage(
     name="one_odor_w_depletion_day_1",
-    task=AindVrForagingTaskLogic( stage_name="one_odor_no_depletion_day_1",
+    task=AindVrForagingTaskLogic( 
+        stage_name="one_odor_no_depletion_day_1",
         task_parameters=s_stage_one_odor_w_depletion_parameters,
     ),
-    metrics_provider=MetricsProvider(metrics_from_dataset),
+    metrics_provider=MetricsProvider(metrics_from_dataset)
 )
 
 s_stage_all_odors_rewarded = Stage(
     name="all_odors_rewarded",
-    task=AindVrForagingTaskLogic(AindVrForagingTaskParameters(
-            updaters= updaters,
-            operation_control=helpers.make_default_operation_control(time_to_collect=99999, velocity_threshold=8),
-            environment=task_logic.BlockStructure(
-                blocks=[
-                    task_logic.Block(
-                        environment_statistics=task_logic.EnvironmentStatistics(
-                            first_state_occupancy = [0.5,0.5], 
-                            transition_matrix=[[0.5,0.5], [0.5,0.5]],
-                            patches=[
-                                helpers.make_graduated_patch(label = 'PatchB',
-                                                             state_index=0,
-                                                             odor_index=1, 
-                                                             max_reward_probability=0.9),
-                                helpers.make_graduated_patch(label = 'PatchC',
-                                                             state_index=1,
-                                                             odor_index=2, 
-                                                             max_reward_probability=0.6)
-                            ]
-                        ),
-                        end_conditions=[],
+    task=AindVrForagingTaskLogic(
+            stage_name="all_odors_rewarded",
+            task_parameters=AindVrForagingTaskParameters(
+                operation_control=helpers.make_default_operation_control(time_to_collect=99999, velocity_threshold=8),
+                environment=task_logic.BlockStructure(
+                    blocks=[
+                        task_logic.Block(
+                            environment_statistics=task_logic.EnvironmentStatistics(
+                                first_state_occupancy = [0.5,0.5], 
+                                transition_matrix=[[0.5,0.5], [0.5,0.5]],
+                                patches=[
+                                    helpers.make_graduated_patch(label = 'PatchB',
+                                                                state_index=0,
+                                                                odor_index=1, 
+                                                                max_reward_probability=0.9),
+                                    helpers.make_graduated_patch(label = 'PatchC',
+                                                                state_index=1,
+                                                                odor_index=2, 
+                                                                max_reward_probability=0.6)
+                                ]
+                            ),
+                            end_conditions=[],
                     )
                 ],
             ),
         ),
     ),
-    metrics_provider=MetricsProvider(metrics_from_dataset),
+    metrics_provider=MetricsProvider(metrics_from_dataset)
 )
 
 s_stage_graduation = Stage(
     name="graduation",
-    task=AindVrForagingTaskLogic(AindVrForagingTaskParameters(
-            updaters= updaters,
+    task=AindVrForagingTaskLogic(
+        stage_name="graduation",
+        task_parameters=AindVrForagingTaskParameters(
             operation_control=helpers.make_default_operation_control(time_to_collect=99999, velocity_threshold=8),
             environment=task_logic.BlockStructure(
                 blocks=[
@@ -183,5 +186,5 @@ s_stage_graduation = Stage(
             ),
         ),
     ),
-    metrics_provider=MetricsProvider(metrics_from_dataset),
+    metrics_provider=MetricsProvider(metrics_from_dataset)
 )
