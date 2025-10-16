@@ -22,19 +22,24 @@ def test_known_curricula(caplog):
 
 
 def test_version(caplog):
-    curricula_logger.handlers.clear()  # the stdout pollutes the test
-    CliApp.run(CurriculumAppCliArgs, cli_args=["version"])
+    curricula_logger.handlers.clear()  # optional: remove stdout pollution
+
     with caplog.at_level(logging.INFO, logger="aind_behavior_vr_foraging_curricula"):
+        CliApp.run(CurriculumAppCliArgs, cli_args=["version"])
         msgs = [m.getMessage() for m in caplog.records]
-        assert msgs == [version]
+
+    assert msgs == [version]
 
 
 def test_dsl_version(caplog):
-    curricula_logger.handlers.clear()  # the stdout pollutes the test
-    CliApp.run(CurriculumAppCliArgs, cli_args=["dsl-version"])
+    curricula_logger.handlers.clear()  # optional: remove stdout/stderr logging
+
+    # Capture logs at INFO level for the relevant logger
     with caplog.at_level(logging.INFO, logger="aind_behavior_vr_foraging_curricula"):
+        CliApp.run(CurriculumAppCliArgs, cli_args=["dsl-version"])
         msgs = [m.getMessage() for m in caplog.records]
-        assert msgs == [dsl_version]
+
+    assert msgs == [dsl_version]
 
 
 def test_known_curricula_implement_runner():
