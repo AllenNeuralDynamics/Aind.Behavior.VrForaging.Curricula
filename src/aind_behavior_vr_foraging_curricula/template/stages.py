@@ -27,7 +27,7 @@ updaters = {
         parameters=NumericalUpdaterParametersHelper(0, 0.005, 0, 0, 0.5),
     ),
     vr_task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD: vr_task_logic.NumericalUpdater(
-        operation=vr_task_logic.NumericalUpdaterOperation.OFFSETPERCENTAGE,
+        operation=vr_task_logic.NumericalUpdaterOperation.GAIN,
         parameters=NumericalUpdaterParametersHelper(40, 0, -0.25, 10, 40),
     ),
 }
@@ -109,7 +109,7 @@ reward_function = vr_task_logic.PatchRewardFunction(
     rule=vr_task_logic.RewardFunctionRule.ON_REWARD,
 )
 
-reset_function = vr_task_logic.OnThisPatchEntryFunction(
+reset_function = vr_task_logic.OnThisPatchEntryRewardFunction(
     available=vr_task_logic.SetValueFunction(value=vr_task_logic.scalar_value(0.1))
 )
 
