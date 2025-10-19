@@ -1,6 +1,6 @@
 # Aind.Behavior.VrForaging.Curricula
 
-![CI](https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.Curricula/actions/workflows/cicd.yml/badge.svg)
+![CI](https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.Curricula/actions/workflows/vr-foraging-curricula.yml/badge.svg)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen)](LICENSE)
 [![ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)

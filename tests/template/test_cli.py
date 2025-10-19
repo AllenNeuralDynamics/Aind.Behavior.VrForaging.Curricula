@@ -1,4 +1,3 @@
-import logging
 from typing import cast
 
 import aind_behavior_curriculum
@@ -6,15 +5,11 @@ from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
 from pydantic_settings import CliApp
 
 from aind_behavior_vr_foraging_curricula.cli import CurriculumAppCliArgs, CurriculumSuggestion
-from aind_behavior_vr_foraging_curricula.template import CURRICULUM_VERSION, __test_placeholder, run_curriculum
+from aind_behavior_vr_foraging_curricula.template import CURRICULUM_VERSION, __test_placeholder
 from aind_behavior_vr_foraging_curricula.template.curriculum import s_stage_b
 
 
-def dummy_runner(args):
-    return run_curriculum(args)
-
-
-def test_cli(caplog):
+def test_cli(capsys):
     trainer_state, metrics = __test_placeholder.make()
     trainer_state = aind_behavior_curriculum.TrainerState.model_validate_json(trainer_state.model_dump_json())
     metrics = aind_behavior_curriculum.Metrics.model_validate_json(metrics.model_dump_json())
@@ -30,9 +25,9 @@ def test_cli(caplog):
             "template",
         ],
     )
-    with caplog.at_level(logging.INFO, logger="aind_behavior_vr_foraging_curricula"):
-        msgs = [m.getMessage() for m in caplog.records]
-        suggestion = CurriculumSuggestion.model_validate_json(msgs[0])
+    captured = capsys.readouterr()
+    json_output = captured.out.strip()
+    suggestion = CurriculumSuggestion.model_validate_json(json_output)
 
     assert suggestion is not None
 

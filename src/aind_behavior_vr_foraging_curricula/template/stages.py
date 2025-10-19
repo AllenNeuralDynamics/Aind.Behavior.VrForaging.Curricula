@@ -11,9 +11,13 @@ from aind_behavior_vr_foraging.task_logic import (
 from .metrics import VrForagingTemplateMetrics, metrics_from_dataset
 
 
-def NumericalUpdaterParametersHelper(initial_value, increment, decrement, minimum, maximum):
+def NumericalUpdaterParametersHelper(initial_value, on_success, on_failure, minimum, maximum):
     return vr_task_logic.NumericalUpdaterParameters(
-        initial_value=initial_value, increment=increment, decrement=decrement, minimum=minimum, maximum=maximum
+        initial_value=initial_value,
+        on_success=on_success,
+        on_failure=on_failure,
+        minimum=minimum,
+        maximum=maximum,
     )
 
 
