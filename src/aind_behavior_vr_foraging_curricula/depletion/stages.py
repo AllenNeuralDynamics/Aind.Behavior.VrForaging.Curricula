@@ -13,14 +13,17 @@ updaters = {
                 task_logic.UpdaterTarget.STOP_DURATION_OFFSET: task_logic.NumericalUpdater(
                     operation=task_logic.NumericalUpdaterOperation.OFFSET,
                     parameters=task_logic.NumericalUpdaterParameters(
-                        initial_value=0, on_success=0.0005, minimum=0, maximum=0.5
+                        initial_value=0, 
+                        on_success=0.0005, 
+                        minimum=0, 
+                        maximum=0.5
                     ),
                 ),
                 task_logic.UpdaterTarget.REWARD_DELAY_OFFSET: task_logic.NumericalUpdater(
                     operation=task_logic.NumericalUpdaterOperation.OFFSET,
                     parameters=task_logic.NumericalUpdaterParameters(
                         initial_value=0,
-                        on_success=-0.003,
+                        on_success=0.003,
                         minimum=0,
                         maximum=0.5,
                     ),
@@ -53,11 +56,17 @@ s_stage_one_odor_no_depletion = Stage(
                                     state_index=0,
                                     odor_specification=task_logic.OdorSpecification(index=0, concentration=1),
                                     reward_specification=task_logic.RewardSpecification(
+                                        operant_logic=helpers.operant_logic(stop_duration=0.0, is_operant=False),
                                         amount=task_logic.scalar_value(5),
                                         probability=task_logic.scalar_value(1),
                                         available=task_logic.scalar_value(9999),
-                                        reward_function=[],
-                                    ),
+                                        reward_function= [task_logic.PatchRewardFunction(
+                                                        amount = task_logic.SetValueFunction(value = task_logic.scalar_value(5)),
+                                                        probability = task_logic.SetValueFunction(value = task_logic.scalar_value(1)),
+                                                        available=task_logic.SetValueFunction(value = task_logic.scalar_value(value=9999)),
+                                                        rule=task_logic.RewardFunctionRule.ON_CHOICE
+                                                        )]
+                                            ),
                                     patch_virtual_sites_generator=helpers.make_virtualsites(rewardsite = 20, 
                                                                                              interpatch_min = 25, 
                                                                                              interpatch_max = 75,
@@ -77,7 +86,35 @@ s_stage_one_odor_no_depletion = Stage(
 )
 
 s_stage_one_odor_w_depletion_parameters = AindVrForagingTaskParameters(
-            updaters= updaters,
+            updaters= {
+                task_logic.UpdaterTarget.STOP_DURATION_OFFSET: task_logic.NumericalUpdater(
+                    operation=task_logic.NumericalUpdaterOperation.OFFSET,
+                    parameters=task_logic.NumericalUpdaterParameters(
+                        initial_value=0.4, 
+                        on_success=0.005, 
+                        minimum=0, 
+                        maximum=0.5
+                    ),
+                ),
+                task_logic.UpdaterTarget.REWARD_DELAY_OFFSET: task_logic.NumericalUpdater(
+                    operation=task_logic.NumericalUpdaterOperation.OFFSET,
+                    parameters=task_logic.NumericalUpdaterParameters(
+                        initial_value=0.25,
+                        on_success=0.003,
+                        minimum=0,
+                        maximum=0.5,
+                    ),
+                ),
+                task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD: task_logic.NumericalUpdater(
+                    operation=task_logic.NumericalUpdaterOperation.GAIN,
+                    parameters=task_logic.NumericalUpdaterParameters(
+                        initial_value=25,
+                        on_success=0.96,
+                        minimum=8,
+                        maximum=60,
+                    ),
+                ),
+            },
             operation_control=helpers.make_default_operation_control(time_to_collect=99999, velocity_threshold=8),
             environment=task_logic.BlockStructure(
                 blocks=[
@@ -88,7 +125,7 @@ s_stage_one_odor_w_depletion_parameters = AindVrForagingTaskParameters(
                                     label="PatchZB",
                                     state_index=0,
                                     odor_specification=task_logic.OdorSpecification(index=0, concentration=1),
-                                    reward_specification=helpers.CountUntilDepleted(available_water= 9999, 
+                                    reward_specification=helpers.CountUntilDepleted(available_water= 40, 
                                                         amount_drop=5, 
                                                         max_p=0.9,
                                                         stop_duration=0.0),
