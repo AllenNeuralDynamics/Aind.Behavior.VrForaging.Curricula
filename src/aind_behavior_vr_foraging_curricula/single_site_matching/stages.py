@@ -29,7 +29,7 @@ def make_patch(
             value=distributions.BinomialDistribution(
                 distribution_parameters=distributions.BinomialDistributionParameters(n=1, p=p_replenish),
                 scaling_parameters=distributions.ScalingParameters(offset=p_reward),
-                truncation_parameters=distributions.TruncationParameters(min=p_reward, max=1),
+                truncation_parameters=distributions.TruncationParameters(min=p_reward, max=1, truncation_mode="clamp"),
             ),
         ),
     )
@@ -218,11 +218,11 @@ s_learn_to_stop = Stage(
 _graduated_make_patch_kwargs = {
     "inter_patch_min_length": 30,
     "inter_patch_mean_length": 60,
-    "inter_patch_max_length": 180,
+    "inter_patch_max_length": 190,
     "inter_site_length": 15,
     "reward_site_length": 50,
-    "reward_amount": 5.0,
-    "stop_duration": 1,
+    "reward_amount": 7,
+    "stop_duration": 1.5,
 }
 
 s_graduated_stage = Stage(
@@ -234,21 +234,15 @@ s_graduated_stage = Stage(
             environment=vr_task_logic.BlockStructure(
                 blocks=[
                     make_block(
-                        p_rew=(0.8, 0.2, None),
-                        p_replenish=(0.4, 0.1, None),
-                        n_min_patches=100,
+                        p_rew=(0.9, 0.10, None),
+                        p_replenish=(0.45, 0.05, None),
+                        n_min_patches=40,
                         make_patch_kwargs=_graduated_make_patch_kwargs,
                     ),
                     make_block(
-                        p_rew=(0.2, 0.8, None),
-                        p_replenish=(0.1, 0.4, None),
-                        n_min_patches=100,
-                        make_patch_kwargs=_graduated_make_patch_kwargs,
-                    ),
-                    make_block(
-                        p_rew=(0.5, 0.5, None),
-                        p_replenish=(0.25, 0.25, None),
-                        n_min_patches=100,
+                        p_rew=(0.10, 0.9, None),
+                        p_replenish=(0.05, 0.45, None),
+                        n_min_patches=40,
                         make_patch_kwargs=_graduated_make_patch_kwargs,
                     ),
                 ],
