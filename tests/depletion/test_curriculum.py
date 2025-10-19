@@ -41,6 +41,12 @@ def init_state() -> TrainerState[Any]:
     return TRAINER.create_trainer_state(stage= s_stage_one_odor_no_depletion, is_on_curriculum=True, active_policies=[p_learn_to_run, p_learn_to_stop, p_stochastic_reward])
 
 @pytest.fixture
+def second_state() -> TrainerState[Any]:
+    current_state = CURRICULUM.see_stages()[1]
+    state = trainer.create_trainer_state(stage=current_state, active_policies=current_state.start_policies)
+    return state
+
+@pytest.fixture
 def fail_metrics() -> DepletionCurriculumMetrics:
     return DepletionCurriculumMetrics(
             total_water_consumed=0,
@@ -170,7 +176,7 @@ class TestCurriculumProgression:
         assert not st_s_stage_all_odors_rewarded_s_stage_graduation(metrics)
 
     # ---------- Circular / policy transitions ----------
-    def test_circular_stage_transitions(self, trainer):
+    def test_circular_stage_transitions(self, second_state: TrainerState):
         current_state = CURRICULUM.see_stages()[2]
         state = trainer.create_trainer_state(stage=current_state, active_policies=current_state.start_policies)
         metrics = DepletionCurriculumMetrics(
@@ -192,9 +198,7 @@ class TestCurriculumProgression:
         regress_state = trainer.evaluate(progress_state, metrics)
         assert regress_state.stage.name != current_state.name or regress_state.stage.name != progress_state.stage.name
 
-    def test_policy_transitions(self, trainer):
-        stage = CURRICULUM.see_stages()[0]
-        state = trainer.create_trainer_state(stage=stage, active_policies=stage.start_policies)
+    def test_policy_transitions(self, init_state: TrainerState):
         metrics = DepletionCurriculumMetrics(
             total_water_consumed=750,
             n_reward_sites_travelled=300,
@@ -204,14 +208,13 @@ class TestCurriculumProgression:
             last_stop_duration=0.5,
             last_reward_site_length=50
         )
-        active_policies = state.active_policies
-        new_policies = trainer._evaluate_policy_transitions(stage, active_policies, metrics)
+        active_policies = init_state.active_policies
+        new_policies = trainer._evaluate_policy_transitions(init_state.stage, active_policies, metrics)
         assert isinstance(new_policies, list)
         assert len(new_policies) == len(set(new_policies))
 
-    def test_trainer_evaluate_updates(self, trainer):
-        stage = CURRICULUM.see_stages()[0]
-        state = trainer.create_trainer_state(stage=stage, active_policies=stage.start_policies)
+    def test_trainer_evaluate_updates(self, init_state: TrainerState):
+
         metrics = DepletionCurriculumMetrics(
             total_water_consumed=750,
             n_reward_sites_travelled=300,
@@ -221,26 +224,24 @@ class TestCurriculumProgression:
             last_stop_duration=0.5,
             last_reward_site_length=50
         )
-        new_state = trainer.evaluate(state, metrics)
+        new_state = trainer.evaluate(init_state, metrics)
         assert isinstance(new_state, TrainerState)
         assert new_state.is_on_curriculum
         assert new_state.curriculum == trainer.curriculum
 
     # ---------- Serialization ----------
-    def test_trainer_state_serialization(self, tmp_path):
+    def test_trainer_state_serialization(self, tmp_path, second_state: TrainerState):
         state_file = tmp_path / "state.json"
-        stage = CURRICULUM.see_stages()[0]
-        state = TRAINER.create_trainer_state(stage=stage, active_policies=stage.start_policies)
-        
-        state_file.write_text(state.json())
+
+        state_file.write_text(second_state.json())
         
         from aind_behavior_vr_foraging_curricula.depletion.curriculum import model_from_json_file
         loaded_state = model_from_json_file(state_file, TRAINER.trainer_state_model)
-        assert loaded_state.stage.name == state.stage.name
-        assert loaded_state.active_policies == state.active_policies
+        assert loaded_state.stage.name == second_state.stage.name
+        assert loaded_state.active_policies == second_state.active_policies
 
     # ---------- Stage advance with wrong metrics ----------
-    def test_stage_does_not_advance_wrong_metrics(self):
+    def test_stage_does_not_advance_wrong_metrics(self, init_state: TrainerState):
         metrics = DepletionCurriculumMetrics(
             total_water_consumed=750,
             n_reward_sites_travelled=500,
@@ -250,7 +251,5 @@ class TestCurriculumProgression:
             last_stop_duration=0.4,
             last_reward_site_length=40
         )
-        stage0 = CURRICULUM.see_stages()[0]
-        state = TRAINER.create_trainer_state(stage=stage0, active_policies=stage0.start_policies)
-        new_state = TRAINER.evaluate(state, metrics)
-        assert new_state.stage.name == stage0.name
+        new_state = TRAINER.evaluate(init_state, metrics)
+        assert new_state.stage.name == init_state.stage.name
