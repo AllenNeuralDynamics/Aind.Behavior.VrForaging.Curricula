@@ -69,7 +69,7 @@ def make_intersite(length_distribution: distributions.Distribution) -> task_logi
 
 def make_interpatch(length_distribution: distributions.Distribution) -> task_logic.VirtualSiteGenerator:
     return task_logic.VirtualSiteGenerator(
-        render_specification=task_logic.RenderSpecification(contrast=0.5),
+        render_specification=task_logic.RenderSpecification(contrast=1),
         label=task_logic.VirtualSiteLabels.INTERPATCH,
         length_distribution=length_distribution,
         treadmill_specification=task_logic.TreadmillSpecification(friction=task_logic.scalar_value(0)),
@@ -82,10 +82,10 @@ def make_virtualsites(rewardsite: float = 50,
                        intersite_max: float = 100):
     return task_logic.PatchVirtualSitesGenerator(
                                         inter_patch=make_interpatch(
-                                            length_distribution=exponential_distribution(interpatch_min, interpatch_max)  # TODO
+                                            length_distribution=exponential_distribution(rate= 0.01, minimum=interpatch_min, maximum=interpatch_max)
                                         ),
                                         inter_site=make_intersite(
-                                            length_distribution=exponential_distribution(intersite_min, intersite_max)  # TODO
+                                            length_distribution=exponential_distribution(rate= 0.05, minimum=intersite_min, maximum=intersite_max)
                                         ),
                                         reward_site=make_reward_site(
                                             length_distribution=task_logic.scalar_value(rewardsite)
@@ -156,7 +156,8 @@ def CountUntilDepleted(
     
         
     reward_function = task_logic.PatchRewardFunction(
-        available=task_logic.ClampedRateFunction(rate=task_logic.scalar_value(-1), minimum=0, maximum=available_water),
+        
+        available=task_logic.ClampedRateFunction(rate=task_logic.scalar_value(-amount_drop), minimum=0, maximum=available_water),
         rule=task_logic.RewardFunctionRule[rule],
     )
 
