@@ -39,8 +39,6 @@ theme:
   - toc.follow
   logo: logo.svg
   favicon: icon.ico
-hooks:
-- docs/_render_curricula.py
 plugins:
 - search
 validation:
@@ -68,4 +66,6 @@ nav:
 - Home: index.md
 - Issues: https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging.Curricula/issues
 - Curricula:
+  - Depletion: curricula_diagrams/depletion.md
+  - Single_site_matching: curricula_diagrams/single_site_matching.md
   - Template: curricula_diagrams/template.md
