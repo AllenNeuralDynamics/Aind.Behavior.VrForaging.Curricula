@@ -53,8 +53,8 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
 
     last_delay_duration = _try_get_datastream_as_dataframe(
         dataset["Behavior"]["SoftwareEvents"]["UpdaterRewardDelayOffset"]
-    )
-        
+    ).data.iloc[-1]
+
     total_water_consumed = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["GiveReward"])
     choices = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ChoiceFeedback"])
     patches = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ActivePatch"])

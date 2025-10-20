@@ -251,6 +251,7 @@ class TestCurriculumProgression:
             n_patches_visited_per_patch={0: 10},
             last_stop_duration=0.4,
             last_reward_site_length=40,
+            last_delay_duration=0.08
         )
         new_state = TRAINER.evaluate(init_state, metrics)
         assert new_state.stage is not None
