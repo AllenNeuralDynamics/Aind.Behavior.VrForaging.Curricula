@@ -55,6 +55,19 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
     choices = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ChoiceFeedback"])
     patches = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ActivePatch"])
 
+    def _safe_dataframe(df, expected_cols):
+        if df is None:
+            return pd.DataFrame(columns=expected_cols)
+        return df
+
+    if choices is None:
+        choices = _safe_dataframe(choices, ["name"])
+    if patches is None:
+        patches = _safe_dataframe(patches, ["data"])
+        
+    if total_water_consumed is None:
+        total_water_consumed = _safe_dataframe(total_water_consumed, ["data"])
+
     patches_visited = (
         pd.concat(
             [
@@ -90,7 +103,7 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
         last_stop_duration = None
         last_reward_site_length = None
 
-    DepletionCurriculumMetrics(
+    return DepletionCurriculumMetrics(
         total_water_consumed=(total_water_consumed["data"].sum() if total_water_consumed is not None else 0.0),
         n_choices=len(choices) if choices is not None else 0,
         n_reward_sites_travelled=len(reward_sites_travelled),
