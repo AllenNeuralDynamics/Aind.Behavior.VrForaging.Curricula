@@ -12,13 +12,13 @@ from .policies import p_learn_to_run, p_learn_to_stop, p_stochastic_reward
 updaters = {
     task_logic.UpdaterTarget.STOP_DURATION_OFFSET: task_logic.NumericalUpdater(
         operation=task_logic.NumericalUpdaterOperation.OFFSET,
-        parameters=task_logic.NumericalUpdaterParameters(initial_value=0, on_success=0.0005, minimum=0, maximum=0.5),
+        parameters=task_logic.NumericalUpdaterParameters(initial_value=0, on_success=0.003, minimum=0, maximum=0.5),
     ),
     task_logic.UpdaterTarget.REWARD_DELAY_OFFSET: task_logic.NumericalUpdater(
         operation=task_logic.NumericalUpdaterOperation.OFFSET,
         parameters=task_logic.NumericalUpdaterParameters(
             initial_value=0,
-            on_success=0.003,
+            on_success=0.0005,
             minimum=0,
             maximum=0.5,
         ),
