@@ -51,6 +51,10 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
     if isinstance(task_logic, dict):
         task_logic = AindVrForagingTaskLogic.model_validate(task_logic)
 
+    last_delay_duration = _try_get_datastream_as_dataframe(
+        dataset["Behavior"]["SoftwareEvents"]["UpdaterRewardDelayOffset"]
+    )
+        
     total_water_consumed = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["GiveReward"])
     choices = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ChoiceFeedback"])
     patches = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ActivePatch"])
@@ -111,6 +115,7 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
         n_reward_sites_travelled=len(reward_sites_travelled),
         last_stop_duration=last_stop_duration,
         last_reward_site_length=last_reward_site_length,
+        last_delay_duration=last_delay_duration,
         n_patches_visited=sum(n_patches_visited_per_patch.values()),
         n_patches_visited_per_patch={int(k): int(v) for k, v in n_patches_visited_per_patch.items()},
     )
