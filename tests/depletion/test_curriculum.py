@@ -254,8 +254,8 @@ class TestCurriculumProgression:
         metrics = DepletionCurriculumMetrics(
             total_water_consumed=0,
             n_reward_sites_travelled=0,
-            n_choices=None,
-            n_patches_visited=None,
+            n_choices=0,
+            n_patches_visited=0,
             n_patches_visited_per_patch={0: 15, 1: 15},
             last_stop_duration=0.5,
             last_reward_site_length=50,
