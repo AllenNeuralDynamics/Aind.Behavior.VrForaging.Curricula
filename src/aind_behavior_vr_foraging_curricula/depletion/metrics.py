@@ -86,7 +86,9 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
     n_patches_visited_per_patch = (
         patches_visited.groupby("label").patch_number.nunique().fillna(0).astype(int).to_dict()
     )
-
+    if not n_patches_visited_per_patch:
+        n_patches_visited_per_patch = {0: 0}
+        
     sites_visited = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ActiveSite"])
 
     if sites_visited is None:
