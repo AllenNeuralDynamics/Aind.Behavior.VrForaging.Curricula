@@ -15,6 +15,7 @@ def make_patch(
     odor_index: int,
     p_reward: float,
     p_replenish: float,
+    stop_duration: float = 0.5,
     reward_amount: float = 5.0,
     inter_site_length: float = 15,
     reward_site_length: float = 40,
@@ -28,7 +29,7 @@ def make_patch(
             value=distributions.BinomialDistribution(
                 distribution_parameters=distributions.BinomialDistributionParameters(n=1, p=p_replenish),
                 scaling_parameters=distributions.ScalingParameters(offset=p_reward),
-                truncation_parameters=distributions.TruncationParameters(min=p_reward, max=1),
+                truncation_parameters=distributions.TruncationParameters(min=p_reward, max=1, truncation_mode="clamp"),
             ),
         ),
     )
@@ -55,7 +56,7 @@ def make_patch(
             delay=vr_task_logic.scalar_value(0.5),
             operant_logic=vr_task_logic.OperantLogic(
                 is_operant=False,
-                stop_duration=0.5,
+                stop_duration=stop_duration,
                 time_to_collect_reward=100000,
                 grace_distance_threshold=10,
             ),
@@ -215,11 +216,13 @@ s_learn_to_stop = Stage(
 )
 
 _graduated_make_patch_kwargs = {
-    "inter_patch_min_length": 50,
-    "inter_patch_mean_length": 150,
-    "inter_patch_max_length": 500,
+    "inter_patch_min_length": 30,
+    "inter_patch_mean_length": 60,
+    "inter_patch_max_length": 190,
     "inter_site_length": 15,
-    "reward_site_length": 40,
+    "reward_site_length": 50,
+    "reward_amount": 7,
+    "stop_duration": 1.5,
 }
 
 s_graduated_stage = Stage(
@@ -231,33 +234,15 @@ s_graduated_stage = Stage(
             environment=vr_task_logic.BlockStructure(
                 blocks=[
                     make_block(
-                        p_rew=(0.8, 0.2, None),
-                        p_replenish=(0.4, 0.1, None),
-                        n_min_patches=100,
+                        p_rew=(0.9, 0.10, None),
+                        p_replenish=(0.45, 0.05, None),
+                        n_min_patches=40,
                         make_patch_kwargs=_graduated_make_patch_kwargs,
                     ),
                     make_block(
-                        p_rew=(0.2, 0.8, None),
-                        p_replenish=(0.1, 0.4, None),
-                        n_min_patches=100,
-                        make_patch_kwargs=_graduated_make_patch_kwargs,
-                    ),
-                    make_block(
-                        p_rew=(0.5, 0.5, None),
-                        p_replenish=(0.2, 0.2, None),
-                        n_min_patches=100,
-                        make_patch_kwargs=_graduated_make_patch_kwargs,
-                    ),
-                    make_block(
-                        p_rew=(0.65, 0.35, None),
-                        p_replenish=(0.325, 0.175, None),
-                        n_min_patches=100,
-                        make_patch_kwargs=_graduated_make_patch_kwargs,
-                    ),
-                    make_block(
-                        p_rew=(0.35, 0.15, None),
-                        p_replenish=(0.175, 0.325, None),
-                        n_min_patches=100,
+                        p_rew=(0.10, 0.9, None),
+                        p_replenish=(0.05, 0.45, None),
+                        n_min_patches=40,
                         make_patch_kwargs=_graduated_make_patch_kwargs,
                     ),
                 ],
