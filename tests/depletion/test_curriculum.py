@@ -164,7 +164,7 @@ class TestCurriculumProgression:
         assert not st_s_stage_all_odors_rewarded_s_stage_graduation(metrics)
 
     # ---------- Circular / policy transitions ----------
-    def test_circular_stage_transitions(self, second_state: TrainerState):
+    def test_circular_stage_transitions(self):
         current_state = CURRICULUM.see_stages()[2]
         state = TRAINER.create_trainer_state(stage=current_state, active_policies=current_state.start_policies)
         metrics = DepletionCurriculumMetrics(
@@ -249,3 +249,18 @@ class TestCurriculumProgression:
         assert new_state.stage is not None
         assert init_state.stage is not None
         assert new_state.stage.name == init_state.stage.name
+
+    def test_empty_session(self, init_state: TrainerState):
+        metrics = DepletionCurriculumMetrics(
+            total_water_consumed=0,
+            n_reward_sites_travelled=0,
+            n_choices=None,
+            n_patches_visited=None,
+            n_patches_visited_per_patch={0: 15, 1: 15},
+            last_stop_duration=0.5,
+            last_reward_site_length=50,
+        )
+        new_state = TRAINER.evaluate(init_state, metrics)
+        assert isinstance(new_state, TrainerState)
+        assert new_state.is_on_curriculum
+        assert new_state.curriculum == TRAINER.curriculum
