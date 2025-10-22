@@ -30,43 +30,45 @@ def p_learn_to_run(metrics: DepletionCurriculumMetrics, task: AindVrForagingTask
         patch_gen = (
             task.task_parameters.environment.blocks[0].environment_statistics.patches[0].patch_virtual_sites_generator
         )
+        n_times = metrics.n_reward_sites_travelled // 200  # 1 for 200–399, 2 for 400–599, 3 for 600+
+        n_times = min(n_times, 3)
+        for _ in range(n_times):
+            assert isinstance(patch_gen.inter_site.length_distribution, distributions.ExponentialDistribution)
+            assert patch_gen.inter_site.length_distribution.truncation_parameters is not None
+            patch_gen.inter_site.length_distribution.truncation_parameters.min = helpers.clamp(
+                patch_gen.inter_site.length_distribution.truncation_parameters.min * 1.5,
+                minimum=10,
+                maximum=20,
+            )
+            patch_gen.inter_site.length_distribution.truncation_parameters.max = helpers.clamp(
+                patch_gen.inter_site.length_distribution.truncation_parameters.max * 1.5,
+                minimum=30,
+                maximum=100,
+            )
 
-        assert isinstance(patch_gen.inter_site.length_distribution, distributions.ExponentialDistribution)
-        assert patch_gen.inter_site.length_distribution.truncation_parameters is not None
-        patch_gen.inter_site.length_distribution.truncation_parameters.min = helpers.clamp(
-            patch_gen.inter_site.length_distribution.truncation_parameters.min * 1.5,
-            minimum=10,
-            maximum=20,
-        )
-        patch_gen.inter_site.length_distribution.truncation_parameters.max = helpers.clamp(
-            patch_gen.inter_site.length_distribution.truncation_parameters.max * 1.5,
-            minimum=30,
-            maximum=100,
-        )
+            assert isinstance(patch_gen.inter_patch.length_distribution, distributions.ExponentialDistribution)
+            assert patch_gen.inter_patch.length_distribution.truncation_parameters is not None
+            patch_gen.inter_patch.length_distribution.truncation_parameters.min = helpers.clamp(
+                patch_gen.inter_patch.length_distribution.truncation_parameters.min * 2,
+                minimum=25,
+                maximum=200,
+            )
+            patch_gen.inter_patch.length_distribution.truncation_parameters.max = helpers.clamp(
+                patch_gen.inter_patch.length_distribution.truncation_parameters.max * 2,
+                minimum=75,
+                maximum=600,
+            )
 
-        assert isinstance(patch_gen.inter_patch.length_distribution, distributions.ExponentialDistribution)
-        assert patch_gen.inter_patch.length_distribution.truncation_parameters is not None
-        patch_gen.inter_patch.length_distribution.truncation_parameters.min = helpers.clamp(
-            patch_gen.inter_patch.length_distribution.truncation_parameters.min * 2,
-            minimum=25,
-            maximum=200,
-        )
-        patch_gen.inter_patch.length_distribution.truncation_parameters.max = helpers.clamp(
-            patch_gen.inter_patch.length_distribution.truncation_parameters.max * 2,
-            minimum=75,
-            maximum=600,
-        )
-
-        assert isinstance(patch_gen.reward_site.length_distribution, distributions.Scalar)
-        patch_gen.reward_site.length_distribution.distribution_parameters.value = helpers.clamp(
-            patch_gen.reward_site.length_distribution.distribution_parameters.value + 10,
-            minimum=20,
-            maximum=50,
-        )
-        # This should not be needed, but just in case...
-        task.task_parameters.environment.blocks[0].environment_statistics.patches[
-            0
-        ].patch_virtual_sites_generator = patch_gen
+            assert isinstance(patch_gen.reward_site.length_distribution, distributions.Scalar)
+            patch_gen.reward_site.length_distribution.distribution_parameters.value = helpers.clamp(
+                patch_gen.reward_site.length_distribution.distribution_parameters.value + 10,
+                minimum=20,
+                maximum=50,
+            )
+            # This should not be needed, but just in case...
+            task.task_parameters.environment.blocks[0].environment_statistics.patches[
+                0
+            ].patch_virtual_sites_generator = patch_gen
 
     return task
 
