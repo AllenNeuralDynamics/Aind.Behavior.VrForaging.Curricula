@@ -30,7 +30,7 @@ def p_stochastic_reward(metrics: DepletionCurriculumMetrics, task: AindVrForagin
         rf = task_logic.task_parameters.environment.blocks[0].environment_statistics.patches[0].reward_specification.reward_function
 
         for i, f in enumerate(rf):
-            if f.function_type == 'OnThisPatchEntryRewardFunction'
+            if f.function_type == 'OnThisPatchEntryRewardFunction':
                 rf[i].probability = task_logic.scalar_value(0.9)
         
     return task
@@ -85,7 +85,7 @@ def p_learn_to_run(metrics: DepletionCurriculumMetrics, task: AindVrForagingTask
 
 
 def p_learn_to_stop(metrics: DepletionCurriculumMetrics, task: AindVrForagingTaskLogic) -> AindVrForagingTaskLogic:
-    if metrics.n_choices > 150:
+    if metrics.n_choices > 100:
         task.task_parameters.updaters[task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD].parameters.initial_value = (
             task.task_parameters.updaters[task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD].parameters.initial_value
             - 16.6
@@ -96,5 +96,7 @@ def p_learn_to_stop(metrics: DepletionCurriculumMetrics, task: AindVrForagingTas
         task.task_parameters.updaters[task_logic.UpdaterTarget.STOP_DURATION_OFFSET].parameters.initial_value = (
             task.task_parameters.updaters[task_logic.UpdaterTarget.STOP_DURATION_OFFSET].parameters.initial_value + 0.1
         )
+
+        task.task_parameters.updaters[task_logic.UpdaterTarget.REWARD_DELAY_OFFSET].parameters.initial_value = metrics.last_delay_duration
 
     return task
