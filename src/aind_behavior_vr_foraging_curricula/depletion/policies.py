@@ -23,15 +23,15 @@ def p_stochastic_reward(metrics: DepletionCurriculumMetrics, task: AindVrForagin
             0
         ].reward_specification.probability = task_logic.scalar_value(0.9)
         
-        task_logic.task_parameters.environment.blocks[0].environment_statistics.patches[
+        task.task_parameters.environment.blocks[0].environment_statistics.patches[
             0
         ].reward_specification.reward_function[0].probability = task_logic.scalar_value(0.9)
         
-        rf = task_logic.task_parameters.environment.blocks[0].environment_statistics.patches[0].reward_specification.reward_function
+        rf = task.task_parameters.environment.blocks[0].environment_statistics.patches[0].reward_specification.reward_function
 
         for i, f in enumerate(rf):
             if f.function_type == 'OnThisPatchEntryRewardFunction':
-                rf[i].probability = task_logic.scalar_value(0.9)
+                rf[i].probability = task.scalar_value(0.9)
         
     return task
 
