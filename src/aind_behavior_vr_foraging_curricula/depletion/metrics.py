@@ -51,9 +51,26 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
     if isinstance(task_logic, dict):
         task_logic = AindVrForagingTaskLogic.model_validate(task_logic)
 
+    last_delay_duration = _try_get_datastream_as_dataframe(
+        dataset["Behavior"]["SoftwareEvents"]["UpdaterRewardDelayOffset"]
+    ).data.iloc[-1]
+
     total_water_consumed = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["GiveReward"])
     choices = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ChoiceFeedback"])
     patches = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ActivePatch"])
+
+    def _safe_dataframe(df, expected_cols):
+        if df is None:
+            return pd.DataFrame(columns=expected_cols)
+        return df
+
+    if choices is None:
+        choices = _safe_dataframe(choices, ["name"])
+    if patches is None:
+        patches = _safe_dataframe(patches, ["data"])
+        
+    if total_water_consumed is None:
+        total_water_consumed = _safe_dataframe(total_water_consumed, ["data"])
 
     patches_visited = (
         pd.concat(
@@ -73,7 +90,9 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
     n_patches_visited_per_patch = (
         patches_visited.groupby("label").patch_number.nunique().fillna(0).astype(int).to_dict()
     )
-
+    if not n_patches_visited_per_patch:
+        n_patches_visited_per_patch = {0: 0}
+        
     sites_visited = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ActiveSite"])
 
     if sites_visited is None:
@@ -90,12 +109,13 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
         last_stop_duration = None
         last_reward_site_length = None
 
-    DepletionCurriculumMetrics(
+    return DepletionCurriculumMetrics(
         total_water_consumed=(total_water_consumed["data"].sum() if total_water_consumed is not None else 0.0),
         n_choices=len(choices) if choices is not None else 0,
         n_reward_sites_travelled=len(reward_sites_travelled),
         last_stop_duration=last_stop_duration,
         last_reward_site_length=last_reward_site_length,
+        last_delay_duration=last_delay_duration,
         n_patches_visited=sum(n_patches_visited_per_patch.values()),
         n_patches_visited_per_patch={int(k): int(v) for k, v in n_patches_visited_per_patch.items()},
     )
