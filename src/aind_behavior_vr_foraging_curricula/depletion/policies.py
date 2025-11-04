@@ -31,7 +31,7 @@ def p_stochastic_reward(metrics: DepletionCurriculumMetrics, task: AindVrForagin
 
         for i, f in enumerate(rf):
             if f.function_type == 'OnThisPatchEntryRewardFunction':
-                rf[i].probability = task_logic.SetValueFunction(value=task_logic.scalar_value(5))
+                rf[i].probability = task_logic.SetValueFunction(value=task_logic.scalar_value(0.9))
         
     return task
 
