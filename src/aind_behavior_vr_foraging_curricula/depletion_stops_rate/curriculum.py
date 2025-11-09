@@ -21,50 +21,18 @@ from ..depletion.stages import (
 )
 from .stages import s_stage_all_odors_rewarded, s_stage_graduation
 
+from ..depletion.curriculum import (st_s_stage_one_odor_w_depletion_day_0_s_stage_all_odors_rewarded, 
+                                   st_s_stage_all_odors_rewarded_s_stage_graduation, 
+                                   st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1, 
+                                   st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0, 
+                                   st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0, 
+                                   st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded
+)
 CURRICULUM_VERSION = "0.1.0"
 CURRICULUM_NAME = "Depletion_stops_rate"
 PKG_LOCATION = ".".join(__name__.split(".")[:-1])
 
 TModel = TypeVar("TModel", bound=pydantic.BaseModel)
-
-
-# ============================================================
-# Stage transitions
-# ============================================================
-
-
-def st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0(metrics: DepletionCurriculumMetrics) -> bool:
-    if metrics.last_reward_site_length is None:
-        raise ValueError("last_reward_site_length is None")
-    if metrics.last_stop_duration is None:
-        raise ValueError("last_stop_duration is None")
-    return (
-        (metrics.n_reward_sites_travelled > 200)
-        and (metrics.n_choices > 150)
-        and (metrics.last_reward_site_length >= 50)
-        and (metrics.last_stop_duration >= 0.4)
-    )
-
-
-def st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1(
-    metrics: DepletionCurriculumMetrics,
-) -> bool:
-    return metrics.n_patches_visited > 20
-
-
-def st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0(
-    metrics: DepletionCurriculumMetrics,
-) -> bool:
-    return metrics.n_patches_visited <= 20
-
-
-def st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded(metrics: DepletionCurriculumMetrics) -> bool:
-    return metrics.n_patches_visited > 20
-
-
-def st_s_stage_all_odors_rewarded_s_stage_graduation(metrics: DepletionCurriculumMetrics) -> bool:
-    patches = metrics.n_patches_visited_per_patch
-    return patches.get(0, 0) > 15 and patches.get(1, 0) > 15
 
 
 # ============================================================
@@ -102,9 +70,14 @@ CURRICULUM.add_stage_transition(
 )
 
 CURRICULUM.add_stage_transition(
-    s_stage_all_odors_rewarded, s_stage_graduation, StageTransition(st_s_stage_all_odors_rewarded_s_stage_graduation)
+    s_stage_one_odor_w_depletion_day_0,
+    s_stage_all_odors_rewarded,
+    StageTransition(st_s_stage_one_odor_w_depletion_day_0_s_stage_all_odors_rewarded),
 )
 
+CURRICULUM.add_stage_transition(
+    s_stage_all_odors_rewarded, s_stage_graduation, StageTransition(st_s_stage_all_odors_rewarded_s_stage_graduation)
+)
 # ==============================================================================
 # Create a Trainer that uses the curriculum to bootstrap suggestions
 # ==============================================================================
