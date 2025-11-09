@@ -114,7 +114,7 @@ def ExponentialProbabilityRewardCount(
 
     agent = task_logic.RewardSpecification(
         operant_logic=operant_logic(stop_duration=stop_duration, is_operant=False),
-        delay=normal_distribution(0.25, 0.15, 0.0, 0.75),
+        delay=normal_distribution(0.0, 0.15, 0.0, 0.75),
         amount=task_logic.scalar_value(value=amount_drop),
         probability=task_logic.scalar_value(maximum_p),
         available=task_logic.scalar_value(available_water),
