@@ -53,7 +53,7 @@ s_stage_graduation = Stage(
                             transition_matrix=[[0.45, 0.45, 0.1], [0.45, 0.45, 0.1], [0.45, 0.45, 0.1]],
                             patches=[
                                 helpers.make_graduated_patch(
-                                    label="odor_0", state_index=2, odor_index=0, max_reward_probability=0.0
+                                    label="odor_0", state_index=2, odor_index=0, max_reward_probability=0.0, rule="ON_CHOICE"
                                 ),
                                 helpers.make_graduated_patch(
                                     label="odor_90", state_index=0, odor_index=1, max_reward_probability=0.9, rate_reward_probability=0.9405088708, rule="ON_CHOICE"
