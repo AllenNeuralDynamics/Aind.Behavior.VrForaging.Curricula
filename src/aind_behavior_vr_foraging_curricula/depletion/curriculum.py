@@ -52,11 +52,15 @@ def st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1(
 ) -> bool:
     return metrics.n_patches_visited > 20
 
+def st_s_stage_one_odor_w_depletion_day_0_s_stage_all_odors_rewarded(
+    metrics: DepletionCurriculumMetrics,
+) -> bool:
+    return metrics.n_patches_visited > 40
 
 def st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0(
     metrics: DepletionCurriculumMetrics,
 ) -> bool:
-    return metrics.n_patches_visited <= 20
+    return metrics.n_patches_visited <= 10
 
 
 def st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded(metrics: DepletionCurriculumMetrics) -> bool:
@@ -94,6 +98,12 @@ CURRICULUM.add_stage_transition(
     s_stage_one_odor_w_depletion_day_1,
     s_stage_one_odor_w_depletion_day_0,
     StageTransition(st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0),
+)
+
+CURRICULUM.add_stage_transition(
+    s_stage_one_odor_w_depletion_day_0,
+    s_stage_all_odors_rewarded,
+    StageTransition(st_s_stage_one_odor_w_depletion_day_0_s_stage_all_odors_rewarded),
 )
 
 CURRICULUM.add_stage_transition(
