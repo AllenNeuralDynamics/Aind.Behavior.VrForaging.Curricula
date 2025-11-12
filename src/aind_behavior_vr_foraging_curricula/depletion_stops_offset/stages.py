@@ -23,10 +23,10 @@ s_stage_all_odors_rewarded = Stage(
                             transition_matrix=[[0.5, 0.5], [0.5, 0.5]],
                             patches=[
                                 helpers.make_graduated_patch(
-                                    label="odor_90", state_index=0, odor_index=1, max_reward_probability=0.9, rate_reward_probability=0.9405088708, rule="ON_CHOICE"
+                                    label="odor_90", state_index=0, odor_index=1, max_reward_probability=0.9569439845429, rate_reward_probability=0.9405088708, rule="ON_CHOICE"
                                 ),
                                 helpers.make_graduated_patch(
-                                    label="odor_60", state_index=1, odor_index=2, max_reward_probability=0.6, rate_reward_probability=0.9405088708, rule="ON_CHOICE"
+                                    label="odor_60", state_index=1, odor_index=2, max_reward_probability=0.637962656361981, rate_reward_probability=0.9405088708, rule="ON_CHOICE"
                                 ),
                             ],
                         ),
@@ -56,10 +56,10 @@ s_stage_graduation = Stage(
                                     label="odor_0", state_index=2, odor_index=0, max_reward_probability=0.0, rule="ON_CHOICE"
                                 ),
                                 helpers.make_graduated_patch(
-                                    label="odor_90", state_index=0, odor_index=1, max_reward_probability=0.9, rate_reward_probability=0.9405088708, rule="ON_CHOICE"
+                                    label="odor_90", state_index=0, odor_index=1, max_reward_probability=0.9569439845429, rate_reward_probability=0.9405088708, rule="ON_CHOICE"
                                 ),
                                 helpers.make_graduated_patch(
-                                    label="odor_60", state_index=1, odor_index=2, max_reward_probability=0.6, rate_reward_probability=0.9405088708, rule="ON_CHOICE"
+                                    label="odor_60", state_index=1, odor_index=2, max_reward_probability=0.637962656361981, rate_reward_probability=0.9405088708, rule="ON_CHOICE"
                                 ),
                             ],
                         ),
