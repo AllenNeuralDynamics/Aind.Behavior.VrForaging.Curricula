@@ -6,6 +6,8 @@ from aind_behavior_curriculum import Metrics
 from aind_behavior_vr_foraging.data_contract import dataset as vr_foraging_dataset
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
 from contraqctor.contract.json import SoftwareEvents
+from aind_behavior_services.task_logic import distributions
+
 from pydantic import Field, NonNegativeFloat, NonNegativeInt
 
 logger = logging.getLogger(__name__)
@@ -101,9 +103,20 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
         reward_sites_travelled = sites_visited[sites_visited["data"].apply(lambda x: x["label"] == "RewardSite")]
 
     if len(reward_sites_travelled) > 0:
-        last_stop_duration = reward_sites_travelled["data"].iloc[-1]["reward_specification"]["operant_logic"][
-            "stop_duration"
-        ]
+        last_stop_duration = reward_sites_travelled["data"].iloc[-1][
+                "reward_specification"
+            ]["operant_logic"]["stop_duration"]
+        
+        if isinstance(last_stop_duration, float):
+            pass
+        
+        elif isinstance(last_stop_duration, distributions.Scalar):
+            last_stop_duration = last_stop_duration.distribution_parameters.value
+        else:
+            raise TypeError(
+                f"Unsupported type for last_stop_duration: {type(last_stop_duration)}"
+            )
+            
         last_reward_site_length = reward_sites_travelled["data"].iloc[-1]["length"]
     else:
         last_stop_duration = None
