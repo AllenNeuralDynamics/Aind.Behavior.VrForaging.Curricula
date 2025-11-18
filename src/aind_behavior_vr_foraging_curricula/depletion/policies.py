@@ -30,7 +30,7 @@ def p_stochastic_reward(metrics: DepletionCurriculumMetrics, task: AindVrForagin
         rf = task.task_parameters.environment.blocks[0].environment_statistics.patches[0].reward_specification.reward_function
 
         for i, f in enumerate(rf):
-            if f.function_type == 'PatchRewardFunction':
+            if f.function_type == "PatchRewardFunction":
                 rf[i].probability = task_logic.SetValueFunction(value=task_logic.scalar_value(0.9))
         
     return task

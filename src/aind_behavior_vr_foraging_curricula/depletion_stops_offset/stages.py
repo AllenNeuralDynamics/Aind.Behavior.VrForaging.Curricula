@@ -1,4 +1,4 @@
-from aind_behavior_curriculum import MetricsProvider, Policy, Stage
+from aind_behavior_curriculum import MetricsProvider, Stage
 from aind_behavior_vr_foraging import task_logic
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic, AindVrForagingTaskParameters
 

@@ -13,7 +13,14 @@ from aind_behavior_curriculum import (
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
 
 from ..cli import CurriculumCliArgs, CurriculumSuggestion, model_from_json_file
-from ..depletion.metrics import DepletionCurriculumMetrics
+from ..depletion.curriculum import (
+    st_s_stage_all_odors_rewarded_s_stage_graduation,
+    st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0,
+    st_s_stage_one_odor_w_depletion_day_0_s_stage_all_odors_rewarded,
+    st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1,
+    st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded,
+    st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0,
+)
 from ..depletion.stages import (
     s_stage_one_odor_no_depletion,
     s_stage_one_odor_w_depletion_day_0,
@@ -21,13 +28,6 @@ from ..depletion.stages import (
 )
 from .stages import s_stage_all_odors_rewarded, s_stage_graduation
 
-from ..depletion.curriculum import (st_s_stage_one_odor_w_depletion_day_0_s_stage_all_odors_rewarded, 
-                                   st_s_stage_all_odors_rewarded_s_stage_graduation, 
-                                   st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1, 
-                                   st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0, 
-                                   st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0, 
-                                   st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded
-)
 CURRICULUM_VERSION = "0.1.0"
 CURRICULUM_NAME = "Depletion_stops_rate"
 PKG_LOCATION = ".".join(__name__.split(".")[:-1])
