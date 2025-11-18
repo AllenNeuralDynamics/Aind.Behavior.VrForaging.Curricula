@@ -4,9 +4,10 @@ import os
 import pandas as pd
 from aind_behavior_curriculum import Metrics
 from aind_behavior_vr_foraging.data_contract import dataset as vr_foraging_dataset
-from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
+from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic, distributions
 from contraqctor.contract.json import SoftwareEvents
-from aind_behavior_services.task_logic import distributions
+from aind_behavior_vr_foraging import task_logic
+
 
 from pydantic import Field, NonNegativeFloat, NonNegativeInt
 
@@ -49,9 +50,9 @@ def _try_get_datastream_as_dataframe(datastream: SoftwareEvents) -> pd.DataFrame
 def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetrics:
     dataset = vr_foraging_dataset(data_directory)
 
-    task_logic = dataset["Behavior"]["InputSchemas"]["TaskLogic"].load().data
-    if isinstance(task_logic, dict):
-        task_logic = AindVrForagingTaskLogic.model_validate(task_logic)
+    task = dataset["Behavior"]["InputSchemas"]["TaskLogic"].load().data
+    if isinstance(task, dict):
+        task = AindVrForagingTaskLogic.model_validate(task)
 
     last_delay_duration = _try_get_datastream_as_dataframe(
         dataset["Behavior"]["SoftwareEvents"]["UpdaterRewardDelayOffset"]
@@ -103,9 +104,10 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
         reward_sites_travelled = sites_visited[sites_visited["data"].apply(lambda x: x["label"] == "RewardSite")]
 
     if len(reward_sites_travelled) > 0:
-        last_stop_duration = reward_sites_travelled["data"].iloc[-1][
+        last_stop_duration_org = reward_sites_travelled["data"].iloc[-1][
                 "reward_specification"
-            ]["operant_logic"]["stop_duration"]
+            ]
+        last_stop_duration = task_logic.OperantLogic.model_validate(last_stop_duration_org['operant_logic']).stop_duration
         
         if isinstance(last_stop_duration, float):
             pass
@@ -119,8 +121,8 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
             
         last_reward_site_length = reward_sites_travelled["data"].iloc[-1]["length"]
     else:
-        last_stop_duration = None
-        last_reward_site_length = None
+        last_stop_duration = task.task_parameters.updaters['StopDurationOffset'].parameters.initial_value
+        last_reward_site_length = task.task_parameters.environment.blocks[0].environment_statistics.patches[0].patch_virtual_sites_generator.reward_site.length_distribution.distribution_parameters.value
 
     return DepletionCurriculumMetrics(
         total_water_consumed=(total_water_consumed["data"].sum() if total_water_consumed is not None else 0.0),
