@@ -107,7 +107,7 @@ def ExponentialProbabilityRewardCount(
         available=task_logic.ClampedRateFunction(
             rate=task_logic.scalar_value(-amount_drop), minimum=0, maximum=available_water
         ),
-        probability=task_logic.ClampedRateFunction(minimum=0, maximum=maximum_p, rate=task_logic.scalar_value(c)),
+        probability=task_logic.ClampedMultiplicativeRateFunction(minimum=0, maximum=maximum_p, rate=task_logic.scalar_value(c)),
         rule=task_logic.RewardFunctionRule[rule],
     )
 
