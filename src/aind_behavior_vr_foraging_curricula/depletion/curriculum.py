@@ -69,7 +69,7 @@ def st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded(metrics: De
 
 def st_s_stage_all_odors_rewarded_s_stage_graduation(metrics: DepletionCurriculumMetrics) -> bool:
     patches = metrics.n_patches_visited_per_patch
-    return patches.get(0, 0) > 15 and patches.get(1, 0) > 15
+    return patches.get(0, 0) > 10 and patches.get(1, 0) > 10
 
 
 # ============================================================
