@@ -42,15 +42,15 @@ wheels = [
 
 [[package]]
 name = "aind-behavior-vr-foraging"
-version = "0.6.0rc12"
+version = "0.6.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aind-behavior-services" },
     { name = "pydantic-settings" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/56/9c/820cce3906ad1a013bd5bd2b17d1cfedb57fce172e84d1e97ac2aa81e6d5/aind_behavior_vr_foraging-0.6.0rc12.tar.gz", hash = "sha256:2e2db09b2ebc33b9238094b6aa1267e9f9d6df79b63a0bb9d4269bb9195ff220", size = 34701, upload-time = "2025-10-15T00:26:13.775Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/30/d2/0b9bd6640d959795fb4280cad0698a0bda724d90f56e932225123322033e/aind_behavior_vr_foraging-0.6.2.tar.gz", hash = "sha256:4405ade3a1ea4b7c1a13c095330ecb7ecb5f1042163752b374277dcf746213de", size = 34512, upload-time = "2025-11-18T02:20:28.169Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/80/a7/f622779264daa521d0a7b071040f5bae6f4b252c7ee1f884c0230137ee72/aind_behavior_vr_foraging-0.6.0rc12-py3-none-any.whl", hash = "sha256:966217499f3dbeaf75a180b520af8c568267134f62c1d316d569c5bfc82b4444", size = 46246, upload-time = "2025-10-15T00:26:12.411Z" },
+    { url = "https://files.pythonhosted.org/packages/36/96/13f405994336737f8682bd29c53182a29836586d6fba1e42854eb414076e/aind_behavior_vr_foraging-0.6.2-py3-none-any.whl", hash = "sha256:afebc1a699a59d75379d54f87b6a989b816818b20f7ef584db740808d6e6e24c", size = 46063, upload-time = "2025-11-18T02:20:26.941Z" },
 ]
 
 [package.optional-dependencies]
@@ -86,7 +86,7 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "aind-behavior-curriculum" },
-    { name = "aind-behavior-vr-foraging", extras = ["data"] },
+    { name = "aind-behavior-vr-foraging", extras = ["data"], specifier = "==0.6.2" },
     { name = "pydantic-settings" },
 ]
 
@@ -333,11 +333,12 @@ wheels = [
 
 [[package]]
 name = "contraqctor"
-version = "0.4.9"
+version = "0.5.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aind-behavior-services" },
     { name = "harp-python" },
+    { name = "jinja2" },
     { name = "matplotlib" },
     { name = "numpy" },
     { name = "opencv-python" },
@@ -349,9 +350,9 @@ dependencies = [
     { name = "scipy" },
     { name = "semver" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ba/9e/457b8bf87aac1b71e311519ee07fb6d643237e5b3f265a688eded522069f/contraqctor-0.4.9.tar.gz", hash = "sha256:2ab5ba8973ed4f0dc275830601cfa3c760872073e58c11a4433615f090c99d9f", size = 179255, upload-time = "2025-09-19T16:48:06.619Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/95/33/e0dfd99fc23ab1ac6162b496727edef844e9279e13a969b05a1b4b05d426/contraqctor-0.5.3.tar.gz", hash = "sha256:0d11e4cf50acf01288b5ed66053211105c3a716fe8a31d63bcc2bf423037ac20", size = 54226, upload-time = "2025-11-10T17:31:19.497Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/25/37/7d24feaec06e6562fa4574018a6fa1d6cdd262bc2654d939d341a37576c2/contraqctor-0.4.9-py3-none-any.whl", hash = "sha256:56216c57f355d2866f1ea4a70d46320d66ad154fa13fa10a005b543ca1c47b9a", size = 55793, upload-time = "2025-09-19T16:48:05.307Z" },
+    { url = "https://files.pythonhosted.org/packages/b4/9a/94fa67d2aecf7703a68be18b97b8d1af09ec9c26c73b2c21d5e881e46353/contraqctor-0.5.3-py3-none-any.whl", hash = "sha256:9306521efd6165007409319be39d4a8d9e286028693237584dbfc9f87e974292", size = 67638, upload-time = "2025-11-10T17:31:18.482Z" },
 ]
 
 [[package]]
@@ -1639,6 +1640,8 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/6b/fa/3234f913fe9a6525a7b97c6dad1f51e72b917e6872e051a5e2ffd8b16fbb/ruamel.yaml.clib-0.2.14-cp314-cp314-macosx_15_0_arm64.whl", hash = "sha256:70eda7703b8126f5e52fcf276e6c0f40b0d314674f896fc58c47b0aef2b9ae83", size = 137970, upload-time = "2025-09-22T19:51:09.472Z" },
     { url = "https://files.pythonhosted.org/packages/ef/ec/4edbf17ac2c87fa0845dd366ef8d5852b96eb58fcd65fc1ecf5fe27b4641/ruamel.yaml.clib-0.2.14-cp314-cp314-musllinux_1_2_i686.whl", hash = "sha256:a0cb71ccc6ef9ce36eecb6272c81afdc2f565950cdcec33ae8e6cd8f7fc86f27", size = 739639, upload-time = "2025-09-22T19:51:10.566Z" },
     { url = "https://files.pythonhosted.org/packages/15/18/b0e1fafe59051de9e79cdd431863b03593ecfa8341c110affad7c8121efc/ruamel.yaml.clib-0.2.14-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:e7cb9ad1d525d40f7d87b6df7c0ff916a66bc52cb61b66ac1b2a16d0c1b07640", size = 764456, upload-time = "2025-09-22T19:51:11.736Z" },
+    { url = "https://files.pythonhosted.org/packages/e7/cd/150fdb96b8fab27fe08d8a59fe67554568727981806e6bc2677a16081ec7/ruamel_yaml_clib-0.2.14-cp314-cp314-win32.whl", hash = "sha256:9b4104bf43ca0cd4e6f738cb86326a3b2f6eef00f417bd1e7efb7bdffe74c539", size = 102394, upload-time = "2025-11-14T21:57:36.703Z" },
+    { url = "https://files.pythonhosted.org/packages/bd/e6/a3fa40084558c7e1dc9546385f22a93949c890a8b2e445b2ba43935f51da/ruamel_yaml_clib-0.2.14-cp314-cp314-win_amd64.whl", hash = "sha256:13997d7d354a9890ea1ec5937a219817464e5cc344805b37671562a401ca3008", size = 122673, upload-time = "2025-11-14T21:57:38.177Z" },
 ]
 
 [[package]]
