@@ -126,7 +126,7 @@ s_stage_one_odor_w_depletion_parameters = AindVrForagingTaskParameters(
                             state_index=0,
                             odor_specification=task_logic.OdorSpecification(index=0, concentration=1),
                             reward_specification=helpers.ExponentialProbabilityRewardCount(
-                                available_water=50, amount_drop=5, maximum_p=0.9, c=0.9851, stop_duration=0.0
+                                available_water=50, amount_drop=5, maximum_p=0.9, c=0.9752, stop_duration=0.0
                             ),
                             patch_virtual_sites_generator=helpers.make_virtualsites(),
                         )
