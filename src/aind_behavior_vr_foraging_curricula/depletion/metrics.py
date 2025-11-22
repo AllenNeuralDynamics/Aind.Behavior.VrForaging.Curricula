@@ -69,7 +69,7 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
         choices = _safe_dataframe(choices, ["name"])
     if patches is None:
         patches = _safe_dataframe(patches, ["data"])
-        
+
     if total_water_consumed is None:
         total_water_consumed = _safe_dataframe(total_water_consumed, ["data"])
 
@@ -93,7 +93,7 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
     )
     if not n_patches_visited_per_patch:
         n_patches_visited_per_patch = {0: 0}
-        
+
     sites_visited = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ActiveSite"])
 
     if sites_visited is None:
@@ -102,25 +102,27 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
         reward_sites_travelled = sites_visited[sites_visited["data"].apply(lambda x: x["label"] == "RewardSite")]
 
     if len(reward_sites_travelled) > 0:
-        last_stop_duration_org = reward_sites_travelled["data"].iloc[-1][
-                "reward_specification"
-            ]
-        last_stop_duration = task_logic.OperantLogic.model_validate(last_stop_duration_org["operant_logic"]).stop_duration
-        
+        last_stop_duration_org = reward_sites_travelled["data"].iloc[-1]["reward_specification"]
+        last_stop_duration = task_logic.OperantLogic.model_validate(
+            last_stop_duration_org["operant_logic"]
+        ).stop_duration
+
         if isinstance(last_stop_duration, float):
             pass
-        
+
         elif isinstance(last_stop_duration, distributions.Scalar):
             last_stop_duration = last_stop_duration.distribution_parameters.value
         else:
-            raise TypeError(
-                f"Unsupported type for last_stop_duration: {type(last_stop_duration)}"
-            )
-            
+            raise TypeError(f"Unsupported type for last_stop_duration: {type(last_stop_duration)}")
+
         last_reward_site_length = reward_sites_travelled["data"].iloc[-1]["length"]
     else:
-        last_stop_duration = task.task_parameters.environment.blocks[0].environment_statistics.patches[0].reward_specification.operant_logic.stop_duration.distribution_parameters.value
-        last_reward_site_length = task.task_parameters.environment.blocks[0].environment_statistics.patches[0].patch_virtual_sites_generator.reward_site.length_distribution.distribution_parameters.value
+        last_stop_duration = task.task_parameters.updaters["StopDurationOffset"].parameters.initial_value
+        last_reward_site_length = (
+            task.task_parameters.environment.blocks[0]
+            .environment_statistics.patches[0]
+            .patch_virtual_sites_generator.reward_site.length_distribution.distribution_parameters.value
+        )
 
     return DepletionCurriculumMetrics(
         total_water_consumed=(total_water_consumed["data"].sum() if total_water_consumed is not None else 0.0),
