@@ -40,7 +40,7 @@ def st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0(metrics:
     if metrics.last_stop_duration is None:
         raise ValueError("last_stop_duration is None")
     return (
-        (metrics.n_reward_sites_travelled > 200)
+        (metrics.n_reward_sites_traveled > 200)
         and (metrics.n_choices > 150)
         and (metrics.last_reward_site_length >= 50)
         and (metrics.last_stop_duration >= 0.4)
