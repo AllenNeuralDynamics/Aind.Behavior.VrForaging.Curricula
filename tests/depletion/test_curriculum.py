@@ -33,7 +33,7 @@ def fail_metrics() -> DepletionCurriculumMetrics:
     return DepletionCurriculumMetrics(
         total_water_consumed=0,
         n_choices=0,
-        n_reward_sites_travelled=5,
+        n_reward_sites_traveled=5,
         n_patches_visited=0,
         n_patches_visited_per_patch={0: 0, 1: 0},
         last_stop_duration=0.3,
@@ -47,7 +47,7 @@ def ok_metrics() -> DepletionCurriculumMetrics:
     return DepletionCurriculumMetrics(
         total_water_consumed=750,
         n_choices=151,
-        n_reward_sites_travelled=300,
+        n_reward_sites_traveled=300,
         n_patches_visited=50,
         n_patches_visited_per_patch={0: 25, 1: 25},
         last_stop_duration=0.5,
@@ -62,7 +62,7 @@ class TestCurriculumProgression:
         metrics = DepletionCurriculumMetrics(
             total_water_consumed=750,
             n_choices=151,
-            n_reward_sites_travelled=300,
+            n_reward_sites_traveled=300,
             n_patches_visited=50,
             n_patches_visited_per_patch={0: 25, 1: 25},
             last_stop_duration=0.5,
@@ -83,7 +83,7 @@ class TestCurriculumProgression:
         metrics = DepletionCurriculumMetrics(
             total_water_consumed=750,
             n_choices=151,
-            n_reward_sites_travelled=300,
+            n_reward_sites_traveled=300,
             n_patches_visited=50,
             n_patches_visited_per_patch={0: 25, 1: 25},
             last_stop_duration=0.5,
@@ -143,7 +143,7 @@ class TestCurriculumProgression:
     def test_missing_metric_fields(self):
         metrics = DepletionCurriculumMetrics(
             total_water_consumed=0,
-            n_reward_sites_travelled=201,
+            n_reward_sites_traveled=201,
             n_choices=151,
             n_patches_visited=0,
             n_patches_visited_per_patch={0: 0, 1: 0},
@@ -157,7 +157,7 @@ class TestCurriculumProgression:
     def test_n_patches_visited_edge_cases(self):
         metrics = DepletionCurriculumMetrics(
             total_water_consumed=750,
-            n_reward_sites_travelled=300,
+            n_reward_sites_traveled=300,
             n_choices=200,
             n_patches_visited=30,
             n_patches_visited_per_patch={},  # missing keys
@@ -175,7 +175,7 @@ class TestCurriculumProgression:
         state = TRAINER.create_trainer_state(stage=current_state, active_policies=current_state.start_policies)
         metrics = DepletionCurriculumMetrics(
             total_water_consumed=750,
-            n_reward_sites_travelled=300,
+            n_reward_sites_traveled=300,
             n_choices=200,
             n_patches_visited=25,
             n_patches_visited_per_patch={0: 15, 1: 15},
@@ -198,7 +198,7 @@ class TestCurriculumProgression:
     def test_policy_transitions(self, init_state: TrainerState):
         metrics = DepletionCurriculumMetrics(
             total_water_consumed=750,
-            n_reward_sites_travelled=300,
+            n_reward_sites_traveled=300,
             n_choices=200,
             n_patches_visited=25,
             n_patches_visited_per_patch={0: 15, 1: 15},
@@ -215,7 +215,7 @@ class TestCurriculumProgression:
     def test_trainer_evaluate_updates(self, init_state: TrainerState):
         metrics = DepletionCurriculumMetrics(
             total_water_consumed=750,
-            n_reward_sites_travelled=300,
+            n_reward_sites_traveled=300,
             n_choices=200,
             n_patches_visited=25,
             n_patches_visited_per_patch={0: 15, 1: 15},
@@ -245,7 +245,7 @@ class TestCurriculumProgression:
     def test_stage_does_not_advance_wrong_metrics(self, init_state: TrainerState):
         metrics = DepletionCurriculumMetrics(
             total_water_consumed=750,
-            n_reward_sites_travelled=500,
+            n_reward_sites_traveled=500,
             n_choices=200,
             n_patches_visited=10,
             n_patches_visited_per_patch={0: 10},
@@ -261,7 +261,7 @@ class TestCurriculumProgression:
     def test_empty_session(self, init_state: TrainerState):
         metrics = DepletionCurriculumMetrics(
             total_water_consumed=0,
-            n_reward_sites_travelled=0,
+            n_reward_sites_traveled=0,
             n_choices=0,
             n_patches_visited=0,
             n_patches_visited_per_patch={0: 15, 1: 15},
