@@ -119,7 +119,7 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
             
         last_reward_site_length = reward_sites_travelled["data"].iloc[-1]["length"]
     else:
-        last_stop_duration = task.task_parameters.updaters["StopDurationOffset"].parameters.initial_value
+        last_stop_duration = task.task_parameters.environment.blocks[0].environment_statistics.patches[0].reward_specification.operant_logic.stop_duration.distribution_parameters.value
         last_reward_site_length = task.task_parameters.environment.blocks[0].environment_statistics.patches[0].patch_virtual_sites_generator.reward_site.length_distribution.distribution_parameters.value
 
     return DepletionCurriculumMetrics(
