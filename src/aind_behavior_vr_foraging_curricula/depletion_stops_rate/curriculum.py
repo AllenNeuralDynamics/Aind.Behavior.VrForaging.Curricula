@@ -22,7 +22,7 @@ from ..depletion.curriculum import (
     st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0,
 )
 from ..depletion.stages import (
-    s_stage_one_odor_no_depletion,
+    make_s_stage_one_odor_no_depletion,
     s_stage_one_odor_w_depletion_day_0,
     s_stage_one_odor_w_depletion_day_1,
 )
@@ -46,7 +46,7 @@ CURRICULUM = curriculum_class()
 
 
 CURRICULUM.add_stage_transition(
-    s_stage_one_odor_no_depletion,
+    make_s_stage_one_odor_no_depletion,
     s_stage_one_odor_w_depletion_day_0,
     StageTransition(st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0),
 )

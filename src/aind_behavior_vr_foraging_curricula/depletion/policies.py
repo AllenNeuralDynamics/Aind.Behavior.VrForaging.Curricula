@@ -22,17 +22,21 @@ def p_stochastic_reward(metrics: DepletionCurriculumMetrics, task: AindVrForagin
         task.task_parameters.environment.blocks[0].environment_statistics.patches[
             0
         ].reward_specification.probability = task_logic.scalar_value(0.9)
-        
+
         task.task_parameters.environment.blocks[0].environment_statistics.patches[
             0
         ].reward_specification.reward_function[0].probability = task_logic.scalar_value(0.9)
-        
-        rf = task.task_parameters.environment.blocks[0].environment_statistics.patches[0].reward_specification.reward_function
+
+        rf = (
+            task.task_parameters.environment.blocks[0]
+            .environment_statistics.patches[0]
+            .reward_specification.reward_function
+        )
 
         for i, f in enumerate(rf):
             if f.function_type == "PatchRewardFunction":
                 rf[i].probability = task_logic.SetValueFunction(value=task_logic.scalar_value(0.9))
-        
+
     return task
 
 
@@ -90,13 +94,20 @@ def p_learn_to_stop(metrics: DepletionCurriculumMetrics, task: AindVrForagingTas
             task.task_parameters.updaters[task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD].parameters.initial_value
             - 16.6
         )
-        if task.task_parameters.updaters[task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD].parameters.initial_value < 15.2:
-            task.task_parameters.updaters[task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD].parameters.initial_value = 15
-            
+        if (
+            task.task_parameters.updaters[task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD].parameters.initial_value
+            < 15.2
+        ):
+            task.task_parameters.updaters[
+                task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD
+            ].parameters.initial_value = 15
+
         task.task_parameters.updaters[task_logic.UpdaterTarget.STOP_DURATION_OFFSET].parameters.initial_value = (
             task.task_parameters.updaters[task_logic.UpdaterTarget.STOP_DURATION_OFFSET].parameters.initial_value + 0.1
         )
 
-        task.task_parameters.updaters[task_logic.UpdaterTarget.REWARD_DELAY_OFFSET].parameters.initial_value = metrics.last_delay_duration
+        task.task_parameters.updaters[
+            task_logic.UpdaterTarget.REWARD_DELAY_OFFSET
+        ].parameters.initial_value = metrics.last_delay_duration
 
     return task

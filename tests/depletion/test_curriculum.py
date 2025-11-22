@@ -38,7 +38,7 @@ def fail_metrics() -> DepletionCurriculumMetrics:
         n_patches_visited_per_patch={0: 0, 1: 0},
         last_stop_duration=0.3,
         last_reward_site_length=30,
-        last_delay_duration=0.05
+        last_delay_duration=0.05,
     )
 
 
@@ -52,7 +52,7 @@ def ok_metrics() -> DepletionCurriculumMetrics:
         n_patches_visited_per_patch={0: 25, 1: 25},
         last_stop_duration=0.5,
         last_reward_site_length=50,
-        last_delay_duration=0.08
+        last_delay_duration=0.08,
     )
 
 
@@ -67,7 +67,7 @@ class TestCurriculumProgression:
             n_patches_visited_per_patch={0: 25, 1: 25},
             last_stop_duration=0.5,
             last_reward_site_length=50,
-            last_delay_duration=0.08
+            last_delay_duration=0.08,
         )
 
         assert init_state.stage is not None
@@ -88,7 +88,7 @@ class TestCurriculumProgression:
             n_patches_visited_per_patch={0: 25, 1: 25},
             last_stop_duration=0.5,
             last_reward_site_length=50,
-            last_delay_duration=0.08
+            last_delay_duration=0.08,
         )
 
         assert init_state.stage is not None
@@ -149,7 +149,7 @@ class TestCurriculumProgression:
             n_patches_visited_per_patch={0: 0, 1: 0},
             last_stop_duration=None,
             last_reward_site_length=None,
-            last_delay_duration=0.08
+            last_delay_duration=0.08,
         )
         with pytest.raises(ValueError):
             st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0(metrics)
@@ -163,7 +163,7 @@ class TestCurriculumProgression:
             n_patches_visited_per_patch={},  # missing keys
             last_stop_duration=0.5,
             last_reward_site_length=50,
-            last_delay_duration=0.08
+            last_delay_duration=0.08,
         )
         assert not st_s_stage_all_odors_rewarded_s_stage_graduation(metrics)
         metrics.n_patches_visited_per_patch = {0: 25, 1: 0}
@@ -181,7 +181,7 @@ class TestCurriculumProgression:
             n_patches_visited_per_patch={0: 15, 1: 15},
             last_stop_duration=0.5,
             last_reward_site_length=50,
-            last_delay_duration=0.08
+            last_delay_duration=0.08,
         )
 
         # Forward transition
@@ -251,7 +251,7 @@ class TestCurriculumProgression:
             n_patches_visited_per_patch={0: 10},
             last_stop_duration=0.4,
             last_reward_site_length=40,
-            last_delay_duration=0.08
+            last_delay_duration=0.08,
         )
         new_state = TRAINER.evaluate(init_state, metrics)
         assert new_state.stage is not None
