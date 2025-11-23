@@ -3,7 +3,7 @@ import os
 
 from aind_behavior_curriculum import Metrics
 from aind_behavior_vr_foraging.data_contract import dataset as vr_foraging_dataset
-from aind_behavior_vr_foraging.task_logic import distributions
+from aind_behavior_vr_foraging.task_logic import distributions, OperantLogic
 from contraqctor.contract.json import SoftwareEvents
 from pydantic import Field, NonNegativeFloat, NonNegativeInt
 
@@ -88,7 +88,9 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
             last_stop_duration = None
             n_reward_sites_traveled = 0
         else:
-            last_stop_duration = reward_sites["data"].iloc[-1]["reward_specification"]["operant_logic"]["stop_duration"]
+            last_stop_duration = OperantLogic.model_validate(
+                reward_sites["data"].iloc[-1]["reward_specification"]["operant_logic"]
+            ).stop_duration
             if isinstance(last_stop_duration, float):
                 pass
             elif isinstance(last_stop_duration, distributions.Scalar):

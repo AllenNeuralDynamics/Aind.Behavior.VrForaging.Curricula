@@ -92,6 +92,8 @@ def p_learn_to_stop(metrics: DepletionCurriculumMetrics, task: AindVrForagingTas
             updaters[task_logic.UpdaterTarget.STOP_DURATION_OFFSET].parameters.initial_value + 0.1
         )
         if metrics.last_delay_duration is not None:
-            updaters[task_logic.UpdaterTarget.REWARD_DELAY_OFFSET].parameters.initial_value = metrics.last_delay_duration
+            updaters[
+                task_logic.UpdaterTarget.REWARD_DELAY_OFFSET
+            ].parameters.initial_value = metrics.last_delay_duration
 
     return task
