@@ -3,7 +3,7 @@ import os
 
 from aind_behavior_curriculum import Metrics
 from aind_behavior_vr_foraging.data_contract import dataset as vr_foraging_dataset
-from aind_behavior_vr_foraging.task_logic import distributions, OperantLogic
+from aind_behavior_vr_foraging.task_logic import OperantLogic, distributions
 from contraqctor.contract.json import SoftwareEvents
 from pydantic import Field, NonNegativeFloat, NonNegativeInt
 

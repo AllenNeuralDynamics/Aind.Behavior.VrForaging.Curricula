@@ -1,10 +1,8 @@
-import os
-from typing import Any, Type, TypeVar, Union
+from typing import Any, Type, TypeVar
 
 import aind_behavior_curriculum
 import pydantic
 from aind_behavior_curriculum import (
-    Metrics,
     StageTransition,
     Trainer,
     TrainerState,
@@ -12,8 +10,10 @@ from aind_behavior_curriculum import (
 )
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
 
-from ..cli import CurriculumCliArgs, CurriculumSuggestion, model_from_json_file
+from ..cli import CurriculumCliArgs, CurriculumSuggestion
+from ..depletion import CURRICULUM_VERSION
 from ..depletion.curriculum import (
+    metrics_from_dataset_path,
     st_s_stage_all_odors_rewarded_s_stage_graduation,
     st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0,
     st_s_stage_one_odor_w_depletion_day_0_s_stage_all_odors_rewarded,
@@ -21,7 +21,6 @@ from ..depletion.curriculum import (
     st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded,
     st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0,
     trainer_state_from_file,
-    metrics_from_dataset_path,
 )
 from ..depletion.stages import (
     make_s_stage_one_odor_no_depletion,
@@ -29,7 +28,6 @@ from ..depletion.stages import (
     make_s_stage_one_odor_w_depletion_day_1,
 )
 from .stages import make_s_stage_all_odors_rewarded, make_s_stage_graduation
-from ..depletion import CURRICULUM_VERSION
 
 CURRICULUM_NAME = "DepletionStopsOffset"
 PKG_LOCATION = ".".join(__name__.split(".")[:-1])
