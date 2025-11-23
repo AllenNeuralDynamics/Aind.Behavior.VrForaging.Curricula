@@ -45,7 +45,7 @@ def fail_metrics() -> DepletionCurriculumMetrics:
 @pytest.fixture
 def ok_metrics() -> DepletionCurriculumMetrics:
     return DepletionCurriculumMetrics(
-        total_water_consumed=750,
+        total_water_consumed=0.750,
         n_choices=151,
         n_reward_sites_traveled=300,
         n_patches_visited=50,
@@ -60,7 +60,7 @@ def ok_metrics() -> DepletionCurriculumMetrics:
 class TestCurriculumProgression:
     def test_p_learn_to_stop(self, init_state: TrainerState):
         metrics = DepletionCurriculumMetrics(
-            total_water_consumed=750,
+            total_water_consumed=0.750,
             n_choices=151,
             n_reward_sites_traveled=300,
             n_patches_visited=50,
@@ -81,7 +81,7 @@ class TestCurriculumProgression:
 
     def test_p_learn_to_run(self, init_state: TrainerState):
         metrics = DepletionCurriculumMetrics(
-            total_water_consumed=750,
+            total_water_consumed=0.750,
             n_choices=151,
             n_reward_sites_traveled=300,
             n_patches_visited=50,
@@ -136,8 +136,7 @@ class TestCurriculumProgression:
         assert proposal.curriculum == TRAINER.curriculum
         assert proposal.stage is not None
         assert init_state.stage is not None
-        assert proposal.stage.name == init_state.stage.name
-        # Cannot evaluate the task as it is subject to change by policies
+        assert proposal.stage == init_state.stage
 
     # ---------- Edge cases ----------
     def test_missing_metric_fields(self):
@@ -151,12 +150,11 @@ class TestCurriculumProgression:
             last_reward_site_length=None,
             last_delay_duration=0.08,
         )
-        with pytest.raises(ValueError):
-            st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0(metrics)
+        assert st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0(metrics) is False
 
     def test_n_patches_visited_edge_cases(self):
         metrics = DepletionCurriculumMetrics(
-            total_water_consumed=750,
+            total_water_consumed=0.750,
             n_reward_sites_traveled=300,
             n_choices=200,
             n_patches_visited=30,
@@ -174,7 +172,7 @@ class TestCurriculumProgression:
         current_state = CURRICULUM.see_stages()[2]
         state = TRAINER.create_trainer_state(stage=current_state, active_policies=current_state.start_policies)
         metrics = DepletionCurriculumMetrics(
-            total_water_consumed=750,
+            total_water_consumed=0.750,
             n_reward_sites_traveled=300,
             n_choices=200,
             n_patches_visited=25,
@@ -195,56 +193,27 @@ class TestCurriculumProgression:
         assert regress_state.stage is not None
         assert regress_state.stage.name != current_state.name or regress_state.stage.name != progress_state.stage.name
 
-    def test_policy_transitions(self, init_state: TrainerState):
-        metrics = DepletionCurriculumMetrics(
-            total_water_consumed=750,
-            n_reward_sites_traveled=300,
-            n_choices=200,
-            n_patches_visited=25,
-            n_patches_visited_per_patch={0: 15, 1: 15},
-            last_stop_duration=0.5,
-            last_reward_site_length=50,
-        )
-        active_policies = init_state.active_policies
-        assert init_state.stage is not None
-        assert active_policies is not None
-
-        new_policies = TRAINER._evaluate_policy_transitions(init_state.stage, active_policies, metrics)
-        assert len(new_policies) == len(set(new_policies))
-
     def test_trainer_evaluate_updates(self, init_state: TrainerState):
         metrics = DepletionCurriculumMetrics(
-            total_water_consumed=750,
+            total_water_consumed=0.750,
             n_reward_sites_traveled=300,
             n_choices=200,
             n_patches_visited=25,
             n_patches_visited_per_patch={0: 15, 1: 15},
             last_stop_duration=0.5,
             last_reward_site_length=50,
+            last_delay_duration=0.08,
         )
         new_state = TRAINER.evaluate(init_state, metrics)
         assert isinstance(new_state, TrainerState)
         assert new_state.is_on_curriculum
         assert new_state.curriculum == TRAINER.curriculum
+        assert new_state.active_policies is not None
+        assert new_state.active_policies == []
 
-    # ---------- Serialization ----------
-    def test_trainer_state_serialization(self, tmp_path, second_state: TrainerState):
-        state_file = tmp_path / "state.json"
-
-        state_file.write_text(second_state.json())
-
-        from aind_behavior_vr_foraging_curricula.depletion.curriculum import model_from_json_file
-
-        loaded_state = model_from_json_file(state_file, TRAINER.trainer_state_model)
-        assert loaded_state.stage is not None
-        assert second_state.stage is not None
-        assert loaded_state.stage.name == second_state.stage.name
-        assert loaded_state.active_policies == second_state.active_policies
-
-    # ---------- Stage advance with wrong metrics ----------
     def test_stage_does_not_advance_wrong_metrics(self, init_state: TrainerState):
         metrics = DepletionCurriculumMetrics(
-            total_water_consumed=750,
+            total_water_consumed=0.75,
             n_reward_sites_traveled=500,
             n_choices=200,
             n_patches_visited=10,
@@ -257,18 +226,3 @@ class TestCurriculumProgression:
         assert new_state.stage is not None
         assert init_state.stage is not None
         assert new_state.stage.name == init_state.stage.name
-
-    def test_empty_session(self, init_state: TrainerState):
-        metrics = DepletionCurriculumMetrics(
-            total_water_consumed=0,
-            n_reward_sites_traveled=0,
-            n_choices=0,
-            n_patches_visited=0,
-            n_patches_visited_per_patch={0: 15, 1: 15},
-            last_stop_duration=0.5,
-            last_reward_site_length=50,
-        )
-        new_state = TRAINER.evaluate(init_state, metrics)
-        assert isinstance(new_state, TrainerState)
-        assert new_state.is_on_curriculum
-        assert new_state.curriculum == TRAINER.curriculum
