@@ -20,16 +20,18 @@ from ..depletion.curriculum import (
     st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1,
     st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded,
     st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0,
+    trainer_state_from_file,
+    metrics_from_dataset_path,
 )
 from ..depletion.stages import (
     make_s_stage_one_odor_no_depletion,
-    s_stage_one_odor_w_depletion_day_0,
-    s_stage_one_odor_w_depletion_day_1,
+    make_s_stage_one_odor_w_depletion_day_0,
+    make_s_stage_one_odor_w_depletion_day_1,
 )
 from .stages import make_s_stage_all_odors_rewarded, make_s_stage_graduation
+from ..depletion import CURRICULUM_VERSION
 
-CURRICULUM_VERSION = "0.1.0"
-CURRICULUM_NAME = "Depletion_stops_offset"
+CURRICULUM_NAME = "DepletionStopsOffset"
 PKG_LOCATION = ".".join(__name__.split(".")[:-1])
 
 TModel = TypeVar("TModel", bound=pydantic.BaseModel)
@@ -46,38 +48,38 @@ CURRICULUM = curriculum_class()
 
 
 CURRICULUM.add_stage_transition(
-    make_s_stage_one_odor_no_depletion,
-    s_stage_one_odor_w_depletion_day_0,
+    make_s_stage_one_odor_no_depletion(),
+    make_s_stage_one_odor_w_depletion_day_0(),
     StageTransition(st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0),
 )
 
 CURRICULUM.add_stage_transition(
-    s_stage_one_odor_w_depletion_day_0,
-    s_stage_one_odor_w_depletion_day_1,
+    make_s_stage_one_odor_w_depletion_day_0(),
+    make_s_stage_one_odor_w_depletion_day_1(),
     StageTransition(st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1),
 )
 
 CURRICULUM.add_stage_transition(
-    s_stage_one_odor_w_depletion_day_1,
-    s_stage_one_odor_w_depletion_day_0,
+    make_s_stage_one_odor_w_depletion_day_1(),
+    make_s_stage_one_odor_w_depletion_day_0(),
     StageTransition(st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0),
 )
 
 CURRICULUM.add_stage_transition(
-    s_stage_one_odor_w_depletion_day_1,
-    make_s_stage_all_odors_rewarded,
+    make_s_stage_one_odor_w_depletion_day_1(),
+    make_s_stage_all_odors_rewarded(),
     StageTransition(st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded),
 )
 
 CURRICULUM.add_stage_transition(
-    s_stage_one_odor_w_depletion_day_0,
-    make_s_stage_all_odors_rewarded,
+    make_s_stage_one_odor_w_depletion_day_0(),
+    make_s_stage_all_odors_rewarded(),
     StageTransition(st_s_stage_one_odor_w_depletion_day_0_s_stage_all_odors_rewarded),
 )
 
 CURRICULUM.add_stage_transition(
-    make_s_stage_all_odors_rewarded,
-    make_s_stage_graduation,
+    make_s_stage_all_odors_rewarded(),
+    make_s_stage_graduation(),
     StageTransition(st_s_stage_all_odors_rewarded_s_stage_graduation),
 )
 
@@ -86,20 +88,6 @@ CURRICULUM.add_stage_transition(
 # ==============================================================================
 
 TRAINER = Trainer(CURRICULUM)
-
-
-def trainer_state_from_file(path: Union[str, os.PathLike], trainer: Trainer = TRAINER) -> TrainerState:
-    return model_from_json_file(path, trainer.trainer_state_model)
-
-
-def metrics_from_dataset_path(dataset_path: Union[str, os.PathLike], trainer_state: TrainerState) -> Metrics:
-    stage = trainer_state.stage
-    if stage is None:
-        raise ValueError("Trainer state does not have a stage")
-    if stage.metrics_provider is None:
-        raise ValueError("Stage does not have a metrics provider")
-    metrics_provider = stage.metrics_provider
-    return metrics_provider.callable(dataset_path)
 
 
 def run_curriculum(args: CurriculumCliArgs) -> CurriculumSuggestion[TrainerState[Any], Any]:
