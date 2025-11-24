@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class DepletionCurriculumMetrics(Metrics):
-    total_water_consumed: NonNegativeFloat = Field(description="Total water (in microliters) consumed in the session.")
+    total_water_consumed: NonNegativeFloat = Field(description="Total water (in milliliters) consumed in the session.")
 
     n_reward_sites_traveled: NonNegativeInt = Field(
         description="Number of reward sites traveled during the session.",
