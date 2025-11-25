@@ -149,7 +149,7 @@ def make_s_stage_one_odor_w_depletion_day_0() -> Stage:
     return Stage(
         name="one_odor_w_depletion_day_0",
         task=AindVrForagingTaskLogic(
-            stage_name="one_odor_no_depletion_day_0",
+            stage_name="one_odor_w_depletion_day_0",
             task_parameters=_make_s_stage_one_odor_w_depletion_parameters(),
         ),
         metrics_provider=MetricsProvider(metrics_from_dataset),
@@ -160,7 +160,7 @@ def make_s_stage_one_odor_w_depletion_day_1() -> Stage:
     return Stage(
         name="one_odor_w_depletion_day_1",
         task=AindVrForagingTaskLogic(
-            stage_name="one_odor_no_depletion_day_1",
+            stage_name="one_odor_w_depletion_day_1",
             task_parameters=_make_s_stage_one_odor_w_depletion_parameters(),
         ),
         metrics_provider=MetricsProvider(metrics_from_dataset),
