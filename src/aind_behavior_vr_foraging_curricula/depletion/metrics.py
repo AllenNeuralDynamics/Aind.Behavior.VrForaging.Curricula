@@ -1,10 +1,9 @@
 import logging
 import os
 
-import pandas as pd
 from aind_behavior_curriculum import Metrics
 from aind_behavior_vr_foraging.data_contract import dataset as vr_foraging_dataset
-from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
+from aind_behavior_vr_foraging.task_logic import OperantLogic, distributions
 from contraqctor.contract.json import SoftwareEvents
 from pydantic import Field, NonNegativeFloat, NonNegativeInt
 
@@ -14,8 +13,8 @@ logger = logging.getLogger(__name__)
 class DepletionCurriculumMetrics(Metrics):
     total_water_consumed: NonNegativeFloat = Field(description="Total water (in milliliters) consumed in the session.")
 
-    n_reward_sites_travelled: NonNegativeInt = Field(
-        description="Number of reward sites travelled during the session.",
+    n_reward_sites_traveled: NonNegativeInt = Field(
+        description="Number of reward sites traveled during the session.",
     )
 
     n_choices: NonNegativeInt = Field(
@@ -34,68 +33,87 @@ class DepletionCurriculumMetrics(Metrics):
     last_reward_site_length: NonNegativeFloat | None = Field(
         description="Length (in cm) of the reward site currently implemented."
     )
-
-
-def _try_get_datastream_as_dataframe(datastream: SoftwareEvents) -> pd.DataFrame | None:
-    try:
-        datastream.load()
-        return datastream.data
-    except FileNotFoundError:
-        return None
+    last_delay_duration: NonNegativeFloat | None = Field(
+        description="Reward delay duration (in seconds) currently implemented."
+    )
 
 
 def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetrics:
     dataset = vr_foraging_dataset(data_directory)
 
-    task_logic = dataset["Behavior"]["InputSchemas"]["TaskLogic"].load().data
-    if isinstance(task_logic, dict):
-        task_logic = AindVrForagingTaskLogic.model_validate(task_logic)
+    software_events = dataset["Behavior"]["SoftwareEvents"]
+    software_events.load_all()
 
-    total_water_consumed = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["GiveReward"])
-    choices = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ChoiceFeedback"])
-    patches = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ActivePatch"])
+    # Get last reward delay offset duration
+    if _has_error_or_empty(software_events["UpdaterRewardDelayOffset"]):
+        last_reward_delay_offset = None
+    else:
+        last_reward_delay_offset = software_events["UpdaterRewardDelayOffset"].data["data"].iloc[-1]
 
-    patches_visited = (
-        pd.concat(
-            [
-                choices[["name"]],
-                patches.assign(
-                    label=pd.json_normalize(patches["data"])["state_index"].values,
-                    patch_number=range(1, len(patches) + 1),
-                )[["patch_number", "label"]],
+    # Calculate water consumed
+    if _has_error_or_empty(software_events["GiveReward"]):
+        total_water_consumed = 0
+    else:
+        total_water_consumed = software_events["GiveReward"].data["data"].sum()
+
+    # Compute patch related metrics
+    choice_events = software_events["ChoiceFeedback"]
+    patches = software_events["ActivePatch"]
+
+    if _has_error_or_empty(choice_events) or _has_error_or_empty(patches):
+        n_patches_visited_per_patch = {0: 0}
+        n_choices = 0
+    else:
+        n_choices = len(choice_events.data)
+        unique_patches = patches.data["data"].apply(lambda x: x["state_index"]).unique()
+        n_patches_visited_per_patch = {int(patch): 0 for patch in unique_patches}
+        for i in range(len(patches.data) - 1):
+            choices_between_patches = choice_events.data[
+                (choice_events.data.index > patches.data.index[i])
+                & (choice_events.data.index < patches.data.index[i + 1])
             ]
-        )
-        .sort_index()
-        .assign(label=lambda df: df["label"].shift(1), patch_number=lambda df: df["patch_number"].shift(1))
-        .loc[lambda df: ~df["name"].isna()]
-    )
+            if len(choices_between_patches) > 0:
+                n_patches_visited_per_patch[int(patches.data["data"].iloc[i]["state_index"])] += 1
 
-    n_patches_visited_per_patch = (
-        patches_visited.groupby("label").patch_number.nunique().fillna(0).astype(int).to_dict()
-    )
-
-    sites_visited = _try_get_datastream_as_dataframe(dataset["Behavior"]["SoftwareEvents"]["ActiveSite"])
-
-    if sites_visited is None:
-        reward_sites_travelled = pd.DataFrame()
-    else:
-        reward_sites_travelled = sites_visited[sites_visited["data"].apply(lambda x: x["label"] == "RewardSite")]
-
-    if len(reward_sites_travelled) > 0:
-        last_stop_duration = reward_sites_travelled["data"].iloc[-1]["reward_specification"]["operant_logic"][
-            "stop_duration"
-        ]
-        last_reward_site_length = reward_sites_travelled["data"].iloc[-1]["length"]
-    else:
-        last_stop_duration = None
+    # Get reward site related metrics
+    if _has_error_or_empty(software_events["ActiveSite"]):
         last_reward_site_length = None
+        last_stop_duration = None
+        n_reward_sites_traveled = 0
+    else:
+        sites_visited = software_events["ActiveSite"].data
+        reward_sites = sites_visited[sites_visited["data"].apply(lambda x: x["label"] == "RewardSite")]
+        if len(reward_sites) == 0:
+            last_reward_site_length = None
+            last_stop_duration = None
+            n_reward_sites_traveled = 0
+        else:
+            last_stop_duration = OperantLogic.model_validate(
+                reward_sites["data"].iloc[-1]["reward_specification"]["operant_logic"]
+            ).stop_duration
+            if isinstance(last_stop_duration, float):
+                pass
+            elif isinstance(last_stop_duration, distributions.Scalar):
+                last_stop_duration = last_stop_duration.distribution_parameters.value
+            else:
+                raise TypeError(
+                    f"Unsupported type for last_stop_duration: {type(last_stop_duration)}. Curriculum metrics only support float or Scalar types."
+                )
 
-    DepletionCurriculumMetrics(
-        total_water_consumed=(total_water_consumed["data"].sum() if total_water_consumed is not None else 0.0),
-        n_choices=len(choices) if choices is not None else 0,
-        n_reward_sites_travelled=len(reward_sites_travelled),
+            last_reward_site_length = reward_sites["data"].iloc[-1]["length"]
+            n_reward_sites_traveled = len(reward_sites)
+
+    return DepletionCurriculumMetrics(
+        total_water_consumed=total_water_consumed / 1000,
+        last_delay_duration=last_reward_delay_offset,
         last_stop_duration=last_stop_duration,
         last_reward_site_length=last_reward_site_length,
         n_patches_visited=sum(n_patches_visited_per_patch.values()),
-        n_patches_visited_per_patch={int(k): int(v) for k, v in n_patches_visited_per_patch.items()},
+        n_patches_visited_per_patch=n_patches_visited_per_patch,
+        n_choices=n_choices,
+        n_reward_sites_traveled=n_reward_sites_traveled,
     )
+
+
+def _has_error_or_empty(datastream: SoftwareEvents) -> bool:
+    return datastream.has_error or datastream.data.empty

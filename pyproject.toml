@@ -21,7 +21,7 @@ classifiers = [
 readme = {file = "README.md", content-type = "text/markdown"}
 
 dependencies = [
-    "aind-behavior-vr-foraging[data]",
+    "aind-behavior-vr-foraging[data] @git+https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging@feat-add-water",
     "aind-behavior-curriculum",
     "pydantic-settings",
 ]

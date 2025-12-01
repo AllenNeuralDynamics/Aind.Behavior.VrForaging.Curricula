@@ -15,11 +15,11 @@ from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
 from ..cli import CurriculumCliArgs, CurriculumSuggestion, model_from_json_file
 from .metrics import DepletionCurriculumMetrics
 from .stages import (
-    s_stage_all_odors_rewarded,
-    s_stage_graduation,
-    s_stage_one_odor_no_depletion,
-    s_stage_one_odor_w_depletion_day_0,
-    s_stage_one_odor_w_depletion_day_1,
+    make_s_stage_all_odors_rewarded,
+    make_s_stage_graduation,
+    make_s_stage_one_odor_no_depletion,
+    make_s_stage_one_odor_w_depletion_day_0,
+    make_s_stage_one_odor_w_depletion_day_1,
 )
 
 CURRICULUM_VERSION = "0.1.0"
@@ -36,11 +36,11 @@ TModel = TypeVar("TModel", bound=pydantic.BaseModel)
 
 def st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0(metrics: DepletionCurriculumMetrics) -> bool:
     if metrics.last_reward_site_length is None:
-        raise ValueError("last_reward_site_length is None")
+        return False
     if metrics.last_stop_duration is None:
-        raise ValueError("last_stop_duration is None")
+        return False
     return (
-        (metrics.n_reward_sites_travelled > 200)
+        (metrics.n_reward_sites_traveled > 200)
         and (metrics.n_choices > 150)
         and (metrics.last_reward_site_length >= 50)
         and (metrics.last_stop_duration >= 0.4)
@@ -53,10 +53,16 @@ def st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1(
     return metrics.n_patches_visited > 20
 
 
+def st_s_stage_one_odor_w_depletion_day_0_s_stage_all_odors_rewarded(
+    metrics: DepletionCurriculumMetrics,
+) -> bool:
+    return metrics.n_patches_visited > 40
+
+
 def st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0(
     metrics: DepletionCurriculumMetrics,
 ) -> bool:
-    return metrics.n_patches_visited <= 20
+    return metrics.n_patches_visited <= 10
 
 
 def st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded(metrics: DepletionCurriculumMetrics) -> bool:
@@ -65,7 +71,7 @@ def st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded(metrics: De
 
 def st_s_stage_all_odors_rewarded_s_stage_graduation(metrics: DepletionCurriculumMetrics) -> bool:
     patches = metrics.n_patches_visited_per_patch
-    return patches.get(0, 0) > 15 and patches.get(1, 0) > 15
+    return patches.get(0, 0) > 10 and patches.get(1, 0) > 10
 
 
 # ============================================================
@@ -79,31 +85,39 @@ CURRICULUM = curriculum_class()
 
 
 CURRICULUM.add_stage_transition(
-    s_stage_one_odor_no_depletion,
-    s_stage_one_odor_w_depletion_day_0,
+    make_s_stage_one_odor_no_depletion(),
+    make_s_stage_one_odor_w_depletion_day_0(),
     StageTransition(st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0),
 )
 
 CURRICULUM.add_stage_transition(
-    s_stage_one_odor_w_depletion_day_0,
-    s_stage_one_odor_w_depletion_day_1,
+    make_s_stage_one_odor_w_depletion_day_0(),
+    make_s_stage_one_odor_w_depletion_day_1(),
     StageTransition(st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1),
 )
 
 CURRICULUM.add_stage_transition(
-    s_stage_one_odor_w_depletion_day_1,
-    s_stage_one_odor_w_depletion_day_0,
+    make_s_stage_one_odor_w_depletion_day_1(),
+    make_s_stage_one_odor_w_depletion_day_0(),
     StageTransition(st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0),
 )
 
 CURRICULUM.add_stage_transition(
-    s_stage_one_odor_w_depletion_day_1,
-    s_stage_all_odors_rewarded,
+    make_s_stage_one_odor_w_depletion_day_0(),
+    make_s_stage_all_odors_rewarded(),
+    StageTransition(st_s_stage_one_odor_w_depletion_day_0_s_stage_all_odors_rewarded),
+)
+
+CURRICULUM.add_stage_transition(
+    make_s_stage_one_odor_w_depletion_day_1(),
+    make_s_stage_all_odors_rewarded(),
     StageTransition(st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded),
 )
 
 CURRICULUM.add_stage_transition(
-    s_stage_all_odors_rewarded, s_stage_graduation, StageTransition(st_s_stage_all_odors_rewarded_s_stage_graduation)
+    make_s_stage_all_odors_rewarded(),
+    make_s_stage_graduation(),
+    StageTransition(st_s_stage_all_odors_rewarded_s_stage_graduation),
 )
 
 # ==============================================================================
