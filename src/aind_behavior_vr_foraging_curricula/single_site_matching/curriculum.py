@@ -15,8 +15,8 @@ from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
 from ..cli import CurriculumCliArgs, CurriculumSuggestion, model_from_json_file
 from .metrics import SingleSiteMatchingMetrics
 from .stages import (
-    s_graduated_stage,
-    s_learn_to_stop,
+    make_s_graduated_stage,
+    make_s_learn_to_stop,
 )
 
 CURRICULUM_VERSION = "0.1.0"
@@ -55,8 +55,8 @@ curriculum_class: Type[aind_behavior_curriculum.Curriculum[AindVrForagingTaskLog
 CURRICULUM = curriculum_class()
 
 CURRICULUM.add_stage_transition(
-    s_learn_to_stop,
-    s_graduated_stage,
+    make_s_learn_to_stop(),
+    make_s_graduated_stage(),
     StageTransition(st_s_learn_to_stop_to_s_graduated_stage),
 )
 

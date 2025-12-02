@@ -168,88 +168,92 @@ def make_operation_control(velocity_threshold: float) -> vr_task_logic.Operation
 # Stage definition
 # ============================================================
 
-s_learn_to_stop = Stage(
-    name="learn_to_stop",
-    task=AindVrForagingTaskLogic(
-        stage_name="learn_to_stop",
-        task_parameters=AindVrForagingTaskParameters(
-            rng_seed=None,
-            updaters={
-                vr_task_logic.UpdaterTarget.STOP_DURATION_OFFSET: vr_task_logic.NumericalUpdater(
-                    operation=vr_task_logic.NumericalUpdaterOperation.OFFSET,
-                    parameters=vr_task_logic.NumericalUpdaterParameters(
-                        initial_value=0, on_success=0.003, minimum=0, maximum=0.6
-                    ),
-                ),
-                vr_task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD: vr_task_logic.NumericalUpdater(
-                    operation=vr_task_logic.NumericalUpdaterOperation.GAIN,
-                    parameters=vr_task_logic.NumericalUpdaterParameters(
-                        initial_value=60,
-                        on_success=0.995,
-                        minimum=8,
-                        maximum=60,
-                    ),
-                ),
-            },
-            environment=vr_task_logic.BlockStructure(
-                blocks=[
-                    make_block(
-                        p_rew=(1, 1, None),
-                        p_replenish=(1, 1, None),
-                        n_min_patches=100000,
-                        make_patch_kwargs={
-                            "inter_patch_min_length": 50,
-                            "inter_patch_mean_length": 120,
-                            "inter_patch_max_length": 150,
-                            "inter_site_length": 15,
-                            "reward_site_length": 40,
-                        },
-                    ),
-                ],
-                sampling_mode="Sequential",
-            ),
-            operation_control=make_operation_control(velocity_threshold=60),
-        ),
-    ),
-    start_policies=[Policy(x) for x in [p_learn_to_stop]],
-    metrics_provider=MetricsProvider(metrics_from_dataset),
-)
 
-_graduated_make_patch_kwargs = {
-    "inter_patch_min_length": 30,
-    "inter_patch_mean_length": 60,
-    "inter_patch_max_length": 190,
-    "inter_site_length": 15,
-    "reward_site_length": 50,
-    "reward_amount": 7,
-    "stop_duration": 1.5,
-}
-
-s_graduated_stage = Stage(
-    name="graduated_stage",
-    task=AindVrForagingTaskLogic(
-        stage_name="graduated_stage",
-        task_parameters=AindVrForagingTaskParameters(
-            rng_seed=None,
-            environment=vr_task_logic.BlockStructure(
-                blocks=[
-                    make_block(
-                        p_rew=(0.9, 0.10, None),
-                        p_replenish=(0.45, 0.05, None),
-                        n_min_patches=40,
-                        make_patch_kwargs=_graduated_make_patch_kwargs,
+def make_s_learn_to_stop() -> Stage:
+    return Stage(
+        name="learn_to_stop",
+        task=AindVrForagingTaskLogic(
+            stage_name="learn_to_stop",
+            task_parameters=AindVrForagingTaskParameters(
+                rng_seed=None,
+                updaters={
+                    vr_task_logic.UpdaterTarget.STOP_DURATION_OFFSET: vr_task_logic.NumericalUpdater(
+                        operation=vr_task_logic.NumericalUpdaterOperation.OFFSET,
+                        parameters=vr_task_logic.NumericalUpdaterParameters(
+                            initial_value=0, on_success=0.003, minimum=0, maximum=0.6
+                        ),
                     ),
-                    make_block(
-                        p_rew=(0.10, 0.9, None),
-                        p_replenish=(0.05, 0.45, None),
-                        n_min_patches=40,
-                        make_patch_kwargs=_graduated_make_patch_kwargs,
+                    vr_task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD: vr_task_logic.NumericalUpdater(
+                        operation=vr_task_logic.NumericalUpdaterOperation.GAIN,
+                        parameters=vr_task_logic.NumericalUpdaterParameters(
+                            initial_value=60,
+                            on_success=0.995,
+                            minimum=8,
+                            maximum=60,
+                        ),
                     ),
-                ],
-                sampling_mode="Random",
+                },
+                environment=vr_task_logic.BlockStructure(
+                    blocks=[
+                        make_block(
+                            p_rew=(1, 1, None),
+                            p_replenish=(1, 1, None),
+                            n_min_patches=100000,
+                            make_patch_kwargs={
+                                "inter_patch_min_length": 50,
+                                "inter_patch_mean_length": 120,
+                                "inter_patch_max_length": 150,
+                                "inter_site_length": 15,
+                                "reward_site_length": 40,
+                            },
+                        ),
+                    ],
+                    sampling_mode="Sequential",
+                ),
+                operation_control=make_operation_control(velocity_threshold=60),
             ),
-            operation_control=make_operation_control(velocity_threshold=8),
         ),
-    ),
-    metrics_provider=MetricsProvider(metrics_from_dataset),
-)
+        start_policies=[Policy(x) for x in [p_learn_to_stop]],
+        metrics_provider=MetricsProvider(metrics_from_dataset),
+    )
+
+
+def make_s_graduated_stage() -> Stage:
+    _graduated_make_patch_kwargs = {
+        "inter_patch_min_length": 30,
+        "inter_patch_mean_length": 60,
+        "inter_patch_max_length": 190,
+        "inter_site_length": 15,
+        "reward_site_length": 50,
+        "reward_amount": 7,
+        "stop_duration": 1.5,
+    }
+
+    return Stage(
+        name="graduated_stage",
+        task=AindVrForagingTaskLogic(
+            stage_name="graduated_stage",
+            task_parameters=AindVrForagingTaskParameters(
+                rng_seed=None,
+                environment=vr_task_logic.BlockStructure(
+                    blocks=[
+                        make_block(
+                            p_rew=(0.9, 0.10, None),
+                            p_replenish=(0.45, 0.05, None),
+                            n_min_patches=40,
+                            make_patch_kwargs=_graduated_make_patch_kwargs,
+                        ),
+                        make_block(
+                            p_rew=(0.10, 0.9, None),
+                            p_replenish=(0.05, 0.45, None),
+                            n_min_patches=40,
+                            make_patch_kwargs=_graduated_make_patch_kwargs,
+                        ),
+                    ],
+                    sampling_mode="Random",
+                ),
+                operation_control=make_operation_control(velocity_threshold=8),
+            ),
+        ),
+        metrics_provider=MetricsProvider(metrics_from_dataset),
+    )
