@@ -53,7 +53,9 @@ def make_s_stage_one_odor_no_depletion() -> Stage:
                                         state_index=0,
                                         odor_specification=task_logic.OdorSpecification(index=0, concentration=1),
                                         reward_specification=task_logic.RewardSpecification(
-                                            operant_logic=helpers.operant_logic(stop_duration=0.0, is_operant=False),
+                                            operant_logic=helpers.make_operant_logic(
+                                                stop_duration=0.0, is_operant=False
+                                            ),
                                             amount=task_logic.scalar_value(5),
                                             probability=task_logic.scalar_value(1),
                                             available=task_logic.scalar_value(9999),
@@ -72,7 +74,7 @@ def make_s_stage_one_odor_no_depletion() -> Stage:
                                                 )
                                             ],
                                         ),
-                                        patch_virtual_sites_generator=helpers.make_virtualsites(
+                                        patch_virtual_sites_generator=helpers.make_patch_virtual_sites_generator(
                                             rewardsite=20,
                                             interpatch_min=25,
                                             interpatch_max=75,
@@ -131,10 +133,10 @@ def _make_s_stage_one_odor_w_depletion_parameters() -> AindVrForagingTaskParamet
                                 label="PatchZB",
                                 state_index=0,
                                 odor_specification=task_logic.OdorSpecification(index=0, concentration=1),
-                                reward_specification=helpers.ExponentialProbabilityRewardCount(
+                                reward_specification=helpers.exponential_probability_reward_count(
                                     available_water=50, amount_drop=5, maximum_p=0.9, c=0.9752, stop_duration=0.0
                                 ),
-                                patch_virtual_sites_generator=helpers.make_virtualsites(),
+                                patch_virtual_sites_generator=helpers.make_patch_virtual_sites_generator(),
                             )
                         ]
                     ),
