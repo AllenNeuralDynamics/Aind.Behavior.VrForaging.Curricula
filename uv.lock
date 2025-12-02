@@ -60,7 +60,7 @@ data = [
 
 [[package]]
 name = "aind-behavior-vr-foraging-curricula"
-version = "0.1.0"
+version = "0.1.1rc1"
 source = { editable = "." }
 dependencies = [
     { name = "aind-behavior-curriculum" },
