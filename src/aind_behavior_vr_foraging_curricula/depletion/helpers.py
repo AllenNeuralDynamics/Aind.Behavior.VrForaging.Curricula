@@ -16,16 +16,16 @@ def make_default_operation_control(time_to_collect: float, velocity_threshold: f
     )
 
 
-def operant_logic(stop_duration: float = 0.5, is_operant: bool = False):
+def make_operant_logic(stop_duration: float = 0.5, is_operant: bool = False):
     return task_logic.OperantLogic(
         is_operant=is_operant,
-        stop_duration=stop_duration,
+        stop_duration=task_logic.scalar_value(stop_duration),
         time_to_collect_reward=100000,
         grace_distance_threshold=10,
     )
 
 
-def normal_distribution(
+def make_normal_distribution(
     mean: float, standard_deviation: float, minimum: float = 0, maximum: float = 9999999
 ) -> distributions.NormalDistribution:
     return distributions.NormalDistribution(
@@ -35,13 +35,13 @@ def normal_distribution(
     )
 
 
-def uniform_distribution(minimum: float, maximum: float) -> distributions.UniformDistribution:
+def make_uniform_distribution(minimum: float, maximum: float) -> distributions.UniformDistribution:
     return distributions.UniformDistribution(
         distribution_parameters=distributions.UniformDistributionParameters(min=minimum, max=maximum)
     )
 
 
-def exponential_distribution(
+def make_exponential_distribution(
     rate: float, minimum: float = 0, maximum: float = 9999999
 ) -> distributions.ExponentialDistribution:
     return distributions.ExponentialDistribution(
@@ -77,7 +77,7 @@ def make_interpatch(length_distribution: distributions.Distribution) -> task_log
     )
 
 
-def make_virtualsites(
+def make_patch_virtual_sites_generator(
     rewardsite: float = 50,
     interpatch_min: float = 200,
     interpatch_max: float = 600,
@@ -86,16 +86,16 @@ def make_virtualsites(
 ):
     return task_logic.PatchVirtualSitesGenerator(
         inter_patch=make_interpatch(
-            length_distribution=exponential_distribution(rate=0.01, minimum=interpatch_min, maximum=interpatch_max)
+            length_distribution=make_exponential_distribution(rate=0.01, minimum=interpatch_min, maximum=interpatch_max)
         ),
         inter_site=make_intersite(
-            length_distribution=exponential_distribution(rate=0.05, minimum=intersite_min, maximum=intersite_max)
+            length_distribution=make_exponential_distribution(rate=0.05, minimum=intersite_min, maximum=intersite_max)
         ),
         reward_site=make_reward_site(length_distribution=task_logic.scalar_value(rewardsite)),
     )
 
 
-def ExponentialProbabilityRewardCount(
+def exponential_probability_reward_count(
     amount_drop: int = 5,
     maximum_p: float = 0.9,
     available_water: int = 50,
@@ -119,71 +119,10 @@ def ExponentialProbabilityRewardCount(
     )
 
     agent = task_logic.RewardSpecification(
-        operant_logic=operant_logic(stop_duration=stop_duration, is_operant=False),
-        delay=normal_distribution(0.0, 0.15, 0.0, 0.75),
+        operant_logic=make_operant_logic(stop_duration=stop_duration, is_operant=False),
+        delay=make_normal_distribution(0.0, 0.15, 0.0, 0.75),
         amount=task_logic.scalar_value(value=amount_drop),
         probability=task_logic.scalar_value(maximum_p),
-        available=task_logic.scalar_value(available_water),
-        reward_function=[reset_function, reward_function],
-    )
-
-    return agent
-
-
-def ExponentialProbabilityReward(
-    amount_drop: int = 5,
-    available_water: int = 50,
-    c=-0.9,
-    maximum_p=0.9,
-    stop_duration: float = 0.5,
-    delay_mean: float = 0.5,
-    rule="ON_REWARD",
-):
-    reward_function = task_logic.PatchRewardFunction(
-        probability=task_logic.ClampedMultiplicativeRateFunction(
-            minimum=0, maximum=maximum_p, rate=task_logic.scalar_value(c)
-        ),
-        rule=task_logic.RewardFunctionRule[rule],
-    )
-
-    reset_function = task_logic.OnThisPatchEntryRewardFunction(
-        probability=task_logic.SetValueFunction(value=task_logic.scalar_value(maximum_p))
-    )
-
-    agent = task_logic.RewardSpecification(
-        operant_logic=operant_logic(stop_duration=stop_duration, is_operant=False),
-        delay=normal_distribution(delay_mean, 0.15, 0.0, 1),
-        amount=task_logic.scalar_value(value=amount_drop),
-        probability=task_logic.scalar_value(maximum_p),
-        available=task_logic.scalar_value(available_water),
-        reward_function=[reset_function, reward_function],
-    )
-    return agent
-
-
-def CountUntilDepleted(
-    available_water: int = 21,
-    max_p: float = 0.9,
-    amount_drop: int = 5,
-    stop_duration: float = 0.5,
-    rule: str = "ON_REWARD",
-):
-    reward_function = task_logic.PatchRewardFunction(
-        available=task_logic.ClampedRateFunction(
-            rate=task_logic.scalar_value(-amount_drop), minimum=0, maximum=available_water
-        ),
-        rule=task_logic.RewardFunctionRule[rule],
-    )
-
-    reset_function = task_logic.OnThisPatchEntryRewardFunction(
-        available=task_logic.SetValueFunction(value=task_logic.scalar_value(available_water))
-    )
-
-    agent = task_logic.RewardSpecification(
-        operant_logic=operant_logic(stop_duration=stop_duration, is_operant=False),
-        delay=normal_distribution(0.0, 0.15, 0.0, 0.75),
-        amount=task_logic.scalar_value(value=amount_drop),
-        probability=task_logic.scalar_value(max_p),
         available=task_logic.scalar_value(available_water),
         reward_function=[reset_function, reward_function],
     )
@@ -215,8 +154,8 @@ def make_graduated_patch(
     )
 
     agent = task_logic.RewardSpecification(
-        operant_logic=operant_logic(stop_duration=stop_duration, is_operant=False),
-        delay=normal_distribution(delay_mean, 0.15, 0.0, 1),
+        operant_logic=make_operant_logic(stop_duration=stop_duration, is_operant=False),
+        delay=make_normal_distribution(delay_mean, 0.15, 0.0, 1),
         amount=task_logic.scalar_value(value=reward_amount),
         probability=task_logic.scalar_value(max_reward_probability),
         available=task_logic.scalar_value(reward_available),
@@ -228,7 +167,7 @@ def make_graduated_patch(
         state_index=state_index,
         odor_specification=task_logic.OdorSpecification(index=odor_index, concentration=1),
         reward_specification=agent,
-        patch_virtual_sites_generator=make_virtualsites(),
+        patch_virtual_sites_generator=make_patch_virtual_sites_generator(),
     )
 
 
