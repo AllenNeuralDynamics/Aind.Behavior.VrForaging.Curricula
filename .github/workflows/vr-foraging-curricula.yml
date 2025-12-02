@@ -217,12 +217,13 @@ jobs:
     runs-on: ubuntu-latest
     name: Publish to PyPI
     needs: [tests, prepare-public-release]
-    if: |
-      (github.event_name == 'workflow_dispatch') ||
-      (github.event_name == 'release' &&
-       github.event.action == 'published' &&
-       !github.event.release.prerelease &&
-       startsWith(github.ref, 'refs/tags/v'))
+    if: false # Disable automatic PyPI publishing for now
+    # if: |
+    #   (github.event_name == 'workflow_dispatch') ||
+    #   (github.event_name == 'release' &&
+    #    github.event.action == 'published' &&
+    #    !github.event.release.prerelease &&
+    #    startsWith(github.ref, 'refs/tags/v'))
     steps:
       - uses: actions/checkout@v5
         with:
@@ -269,7 +270,7 @@ jobs:
   build-docs:
     name: Build and deploy documentation to GitHub Pages
     runs-on: windows-latest
-    needs: github-rc-release
+    needs: prepare-public-release
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout repository
