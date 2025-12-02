@@ -104,17 +104,23 @@ def ExponentialProbabilityRewardCount(
     rule: str = "ON_REWARD",
 ):
     reward_function = task_logic.PatchRewardFunction(
-        available=task_logic.ClampedRateFunction(minimum=0, maximum=maximum_p, rate=task_logic.scalar_value(c)),
+        available=task_logic.ClampedRateFunction(
+            rate=task_logic.scalar_value(-amount_drop), minimum=0, maximum=available_water
+        ),
+        probability=task_logic.ClampedMultiplicativeRateFunction(
+            minimum=0, maximum=maximum_p, rate=task_logic.scalar_value(c)
+        ),
         rule=task_logic.RewardFunctionRule[rule],
     )
 
     reset_function = task_logic.OnThisPatchEntryRewardFunction(
-        available=task_logic.SetValueFunction(value=task_logic.scalar_value(available_water))
+        available=task_logic.SetValueFunction(value=task_logic.scalar_value(available_water)),
+        probability=task_logic.SetValueFunction(value=task_logic.scalar_value(maximum_p)),
     )
 
     agent = task_logic.RewardSpecification(
         operant_logic=operant_logic(stop_duration=stop_duration, is_operant=False),
-        delay=normal_distribution(0.25, 0.15, 0.0, 0.75),
+        delay=normal_distribution(0.0, 0.15, 0.0, 0.75),
         amount=task_logic.scalar_value(value=amount_drop),
         probability=task_logic.scalar_value(maximum_p),
         available=task_logic.scalar_value(available_water),
