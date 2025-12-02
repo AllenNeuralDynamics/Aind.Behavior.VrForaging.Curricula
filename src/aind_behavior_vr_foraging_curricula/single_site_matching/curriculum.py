@@ -19,7 +19,7 @@ from .stages import (
     make_s_learn_to_stop,
 )
 
-CURRICULUM_VERSION = "0.1.0"
+CURRICULUM_VERSION = "0.1.1"
 CURRICULUM_NAME = "SingleSiteMatching"
 PKG_LOCATION = ".".join(__name__.split(".")[:-1])
 
