@@ -26,8 +26,8 @@ class DepletionCurriculumMetrics(Metrics):
         description="Total number of patches visited during the session aggregated by patch index."
     )
 
-    last_stop_duration_offset_updater: NonNegativeFloat | None = Field(
-        description="Minimum stop duration (in seconds) currently implemented."
+    last_stop_duration_offset_updater: NonNegativeFloat = Field(
+        description="Last offset added to the stop duration (in seconds)."
     )
     last_reward_site_length: NonNegativeFloat | None = Field(
         description="Length (in cm) of the reward site currently implemented."
@@ -88,10 +88,7 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
             last_reward_site_length = reward_sites["data"].iloc[-1]["length"]
             n_reward_sites_traveled = len(reward_sites)
 
-    if _has_error_or_empty(software_events["UpdaterStopDurationOffset"]):
-        last_stop_duration_offset_updater = None
-    else:
-        last_stop_duration_offset_updater = software_events["UpdaterStopDurationOffset"].data["data"].iloc[-1]
+    last_stop_duration_offset_updater = software_events["UpdaterStopDurationOffset"].data["data"].iloc[-1]
 
     return DepletionCurriculumMetrics(
         total_water_consumed=total_water_consumed / 1000,
