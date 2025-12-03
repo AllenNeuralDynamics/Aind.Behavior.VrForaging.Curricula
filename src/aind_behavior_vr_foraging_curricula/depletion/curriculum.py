@@ -22,7 +22,7 @@ from .stages import (
     make_s_stage_one_odor_w_depletion_day_1,
 )
 
-CURRICULUM_VERSION = "0.1.0"
+CURRICULUM_VERSION = "0.2.0"
 CURRICULUM_NAME = "Depletion"
 PKG_LOCATION = ".".join(__name__.split(".")[:-1])
 
