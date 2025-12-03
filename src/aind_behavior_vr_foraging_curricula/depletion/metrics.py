@@ -88,18 +88,7 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
             last_stop_duration = None
             n_reward_sites_traveled = 0
         else:
-            last_stop_duration = OperantLogic.model_validate(
-                reward_sites["data"].iloc[-1]["reward_specification"]["operant_logic"]
-            ).stop_duration
-            if isinstance(last_stop_duration, float):
-                pass
-            elif isinstance(last_stop_duration, distributions.Scalar):
-                last_stop_duration = last_stop_duration.distribution_parameters.value
-            else:
-                raise TypeError(
-                    f"Unsupported type for last_stop_duration: {type(last_stop_duration)}. Curriculum metrics only support float or Scalar types."
-                )
-
+            last_stop_duration = software_events['UpdaterStopDurationOffset'].data["data"].iloc[-1]
             last_reward_site_length = reward_sites["data"].iloc[-1]["length"]
             n_reward_sites_traveled = len(reward_sites)
 
