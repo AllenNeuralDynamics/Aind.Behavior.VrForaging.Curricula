@@ -36,7 +36,7 @@ def fail_metrics() -> DepletionCurriculumMetrics:
         n_reward_sites_traveled=5,
         n_patches_visited=0,
         n_patches_visited_per_patch={0: 0, 1: 0},
-        last_stop_duration=0.3,
+        last_stop_duration_offset_updater=0.3,
         last_reward_site_length=30,
         last_delay_duration=0.05,
     )
@@ -50,7 +50,7 @@ def ok_metrics() -> DepletionCurriculumMetrics:
         n_reward_sites_traveled=300,
         n_patches_visited=50,
         n_patches_visited_per_patch={0: 25, 1: 25},
-        last_stop_duration=0.5,
+        last_stop_duration_offset_updater=0.5,
         last_reward_site_length=50,
         last_delay_duration=0.08,
     )
@@ -65,7 +65,7 @@ class TestCurriculumProgression:
             n_reward_sites_traveled=300,
             n_patches_visited=50,
             n_patches_visited_per_patch={0: 25, 1: 25},
-            last_stop_duration=0.5,
+            last_stop_duration_offset_updater=0.5,
             last_reward_site_length=50,
             last_delay_duration=0.08,
         )
@@ -86,7 +86,7 @@ class TestCurriculumProgression:
             n_reward_sites_traveled=300,
             n_patches_visited=50,
             n_patches_visited_per_patch={0: 25, 1: 25},
-            last_stop_duration=0.5,
+            last_stop_duration_offset_updater=0.5,
             last_reward_site_length=50,
             last_delay_duration=0.08,
         )
@@ -146,7 +146,7 @@ class TestCurriculumProgression:
             n_choices=151,
             n_patches_visited=0,
             n_patches_visited_per_patch={0: 0, 1: 0},
-            last_stop_duration=None,
+            last_stop_duration_offset_updater=0.5,
             last_reward_site_length=None,
             last_delay_duration=0.08,
         )
@@ -159,7 +159,7 @@ class TestCurriculumProgression:
             n_choices=200,
             n_patches_visited=30,
             n_patches_visited_per_patch={},  # missing keys
-            last_stop_duration=0.5,
+            last_stop_duration_offset_updater=0.5,
             last_reward_site_length=50,
             last_delay_duration=0.08,
         )
@@ -177,7 +177,7 @@ class TestCurriculumProgression:
             n_choices=200,
             n_patches_visited=25,
             n_patches_visited_per_patch={0: 15, 1: 15},
-            last_stop_duration=0.5,
+            last_stop_duration_offset_updater=0.5,
             last_reward_site_length=50,
             last_delay_duration=0.08,
         )
@@ -200,7 +200,7 @@ class TestCurriculumProgression:
             n_choices=200,
             n_patches_visited=25,
             n_patches_visited_per_patch={0: 15, 1: 15},
-            last_stop_duration=0.5,
+            last_stop_duration_offset_updater=0.5,
             last_reward_site_length=50,
             last_delay_duration=0.08,
         )
@@ -218,7 +218,7 @@ class TestCurriculumProgression:
             n_choices=200,
             n_patches_visited=10,
             n_patches_visited_per_patch={0: 10},
-            last_stop_duration=0.4,
+            last_stop_duration_offset_updater=0.4,
             last_reward_site_length=40,
             last_delay_duration=0.08,
         )

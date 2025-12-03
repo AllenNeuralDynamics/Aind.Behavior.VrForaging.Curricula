@@ -3,7 +3,6 @@ import os
 
 from aind_behavior_curriculum import Metrics
 from aind_behavior_vr_foraging.data_contract import dataset as vr_foraging_dataset
-from aind_behavior_vr_foraging.task_logic import OperantLogic, distributions
 from contraqctor.contract.json import SoftwareEvents
 from pydantic import Field, NonNegativeFloat, NonNegativeInt
 
@@ -27,8 +26,8 @@ class DepletionCurriculumMetrics(Metrics):
         description="Total number of patches visited during the session aggregated by patch index."
     )
 
-    last_stop_duration: NonNegativeFloat | None = Field(
-        description="Minimum stop duration (in seconds) currently implemented."
+    last_stop_duration_offset_updater: NonNegativeFloat = Field(
+        description="Last offset added to the stop duration (in seconds)."
     )
     last_reward_site_length: NonNegativeFloat | None = Field(
         description="Length (in cm) of the reward site currently implemented."
@@ -78,35 +77,23 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
     # Get reward site related metrics
     if _has_error_or_empty(software_events["ActiveSite"]):
         last_reward_site_length = None
-        last_stop_duration = None
         n_reward_sites_traveled = 0
     else:
         sites_visited = software_events["ActiveSite"].data
         reward_sites = sites_visited[sites_visited["data"].apply(lambda x: x["label"] == "RewardSite")]
         if len(reward_sites) == 0:
             last_reward_site_length = None
-            last_stop_duration = None
             n_reward_sites_traveled = 0
         else:
-            last_stop_duration = OperantLogic.model_validate(
-                reward_sites["data"].iloc[-1]["reward_specification"]["operant_logic"]
-            ).stop_duration
-            if isinstance(last_stop_duration, float):
-                pass
-            elif isinstance(last_stop_duration, distributions.Scalar):
-                last_stop_duration = last_stop_duration.distribution_parameters.value
-            else:
-                raise TypeError(
-                    f"Unsupported type for last_stop_duration: {type(last_stop_duration)}. Curriculum metrics only support float or Scalar types."
-                )
-
             last_reward_site_length = reward_sites["data"].iloc[-1]["length"]
             n_reward_sites_traveled = len(reward_sites)
+
+    last_stop_duration_offset_updater = software_events["UpdaterStopDurationOffset"].data["data"].iloc[-1]
 
     return DepletionCurriculumMetrics(
         total_water_consumed=total_water_consumed / 1000,
         last_delay_duration=last_reward_delay_offset,
-        last_stop_duration=last_stop_duration,
+        last_stop_duration_offset_updater=last_stop_duration_offset_updater,
         last_reward_site_length=last_reward_site_length,
         n_patches_visited=sum(n_patches_visited_per_patch.values()),
         n_patches_visited_per_patch=n_patches_visited_per_patch,

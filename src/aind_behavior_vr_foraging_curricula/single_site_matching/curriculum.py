@@ -32,7 +32,9 @@ TModel = TypeVar("TModel", bound=pydantic.BaseModel)
 
 
 def st_s_learn_to_stop_to_s_graduated_stage(metrics: SingleSiteMatchingMetrics) -> bool:
-    if metrics.last_stop_duration_offset_updater is None or metrics.last_stop_threshold_updater is None:
+    if metrics.last_stop_threshold_updater is None:
+        return False
+    if metrics.last_stop_duration_offset_updater is None:
         return False
 
     if (
