@@ -146,7 +146,7 @@ class TestCurriculumProgression:
             n_choices=151,
             n_patches_visited=0,
             n_patches_visited_per_patch={0: 0, 1: 0},
-            last_stop_duration_offset_updater=None,
+            last_stop_duration_offset_updater=0.5,
             last_reward_site_length=None,
             last_delay_duration=0.08,
         )
