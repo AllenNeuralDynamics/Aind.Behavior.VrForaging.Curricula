@@ -77,24 +77,26 @@ def metrics_from_dataset(data_directory: os.PathLike) -> DepletionCurriculumMetr
     # Get reward site related metrics
     if _has_error_or_empty(software_events["ActiveSite"]):
         last_reward_site_length = None
-        last_stop_duration = None
         n_reward_sites_traveled = 0
     else:
         sites_visited = software_events["ActiveSite"].data
         reward_sites = sites_visited[sites_visited["data"].apply(lambda x: x["label"] == "RewardSite")]
         if len(reward_sites) == 0:
             last_reward_site_length = None
-            last_stop_duration = None
             n_reward_sites_traveled = 0
         else:
-            last_stop_duration = software_events["UpdaterStopDurationOffset"].data["data"].iloc[-1]
             last_reward_site_length = reward_sites["data"].iloc[-1]["length"]
             n_reward_sites_traveled = len(reward_sites)
+
+    if _has_error_or_empty(software_events["UpdaterStopDurationOffset"]):
+        last_stop_duration_offset_updater = None
+    else:
+        last_stop_duration_offset_updater = software_events["UpdaterStopDurationOffset"].data["data"].iloc[-1]
 
     return DepletionCurriculumMetrics(
         total_water_consumed=total_water_consumed / 1000,
         last_delay_duration=last_reward_delay_offset,
-        last_stop_duration=last_stop_duration,
+        last_stop_duration_offset_updater=last_stop_duration_offset_updater,
         last_reward_site_length=last_reward_site_length,
         n_patches_visited=sum(n_patches_visited_per_patch.values()),
         n_patches_visited_per_patch=n_patches_visited_per_patch,

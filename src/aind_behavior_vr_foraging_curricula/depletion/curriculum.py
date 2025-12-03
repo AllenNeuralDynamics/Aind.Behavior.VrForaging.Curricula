@@ -37,13 +37,13 @@ TModel = TypeVar("TModel", bound=pydantic.BaseModel)
 def st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0(metrics: DepletionCurriculumMetrics) -> bool:
     if metrics.last_reward_site_length is None:
         return False
-    if metrics.last_stop_duration is None:
+    if metrics.last_stop_duration_offset_updater is None:
         return False
     return (
         (metrics.n_reward_sites_traveled > 200)
         and (metrics.n_choices > 150)
         and (metrics.last_reward_site_length >= 50)
-        and (metrics.last_stop_duration >= 0.4)
+        and (metrics.last_stop_duration_offset_updater >= 0.4)
     )
 
 
