@@ -26,7 +26,7 @@ class DepletionCurriculumMetrics(Metrics):
         description="Total number of patches visited during the session aggregated by patch index."
     )
 
-    last_stop_duration: NonNegativeFloat | None = Field(
+    last_stop_duration_offset_updater: NonNegativeFloat | None = Field(
         description="Minimum stop duration (in seconds) currently implemented."
     )
     last_reward_site_length: NonNegativeFloat | None = Field(
