@@ -10,8 +10,8 @@ from aind_behavior_curriculum import (
 )
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
 
+from .. import __semver__
 from ..cli import CurriculumCliArgs, CurriculumSuggestion
-from ..depletion import CURRICULUM_VERSION
 from ..depletion.curriculum import (
     metrics_from_dataset_path,
     st_s_stage_all_odors_rewarded_s_stage_graduation,
@@ -40,7 +40,7 @@ TModel = TypeVar("TModel", bound=pydantic.BaseModel)
 # ============================================================
 
 curriculum_class: Type[aind_behavior_curriculum.Curriculum[AindVrForagingTaskLogic]] = create_curriculum(
-    CURRICULUM_NAME, CURRICULUM_VERSION, (AindVrForagingTaskLogic,), pkg_location=PKG_LOCATION
+    CURRICULUM_NAME, __semver__, (AindVrForagingTaskLogic,), pkg_location=PKG_LOCATION
 )
 CURRICULUM = curriculum_class()
 
@@ -89,7 +89,7 @@ TRAINER = Trainer(CURRICULUM)
 
 def run_curriculum(args: CurriculumCliArgs) -> CurriculumSuggestion[TrainerState[Any], Any]:
     metrics: aind_behavior_curriculum.Metrics
-    trainer_state = trainer_state_from_file(args.input_trainer_state)
+    trainer_state = trainer_state_from_file(args.input_trainer_state, TRAINER)
     metrics = metrics_from_dataset_path(args.data_directory, trainer_state)
     trainer_state = TRAINER.evaluate(trainer_state, metrics)
-    return CurriculumSuggestion(trainer_state=trainer_state, metrics=metrics, version=CURRICULUM_VERSION)
+    return CurriculumSuggestion(trainer_state=trainer_state, metrics=metrics, version=__semver__)

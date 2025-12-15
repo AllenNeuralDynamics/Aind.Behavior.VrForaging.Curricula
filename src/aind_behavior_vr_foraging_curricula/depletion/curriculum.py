@@ -1,10 +1,8 @@
-import os
-from typing import Any, Type, TypeVar, Union
+from typing import Any, Type, TypeVar
 
 import aind_behavior_curriculum
 import pydantic
 from aind_behavior_curriculum import (
-    Metrics,
     StageTransition,
     Trainer,
     TrainerState,
@@ -12,7 +10,9 @@ from aind_behavior_curriculum import (
 )
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
 
-from ..cli import CurriculumCliArgs, CurriculumSuggestion, model_from_json_file
+from .. import __semver__
+from ..cli import CurriculumCliArgs, CurriculumSuggestion
+from ..utils import metrics_from_dataset_path, trainer_state_from_file
 from .metrics import DepletionCurriculumMetrics
 from .stages import (
     make_s_stage_all_odors_rewarded,
@@ -22,7 +22,6 @@ from .stages import (
     make_s_stage_one_odor_w_depletion_day_1,
 )
 
-CURRICULUM_VERSION = "0.2.0"
 CURRICULUM_NAME = "Depletion"
 PKG_LOCATION = ".".join(__name__.split(".")[:-1])
 
@@ -77,7 +76,7 @@ def st_s_stage_all_odors_rewarded_s_stage_graduation(metrics: DepletionCurriculu
 # ============================================================
 
 curriculum_class: Type[aind_behavior_curriculum.Curriculum[AindVrForagingTaskLogic]] = create_curriculum(
-    CURRICULUM_NAME, CURRICULUM_VERSION, (AindVrForagingTaskLogic,), pkg_location=PKG_LOCATION
+    CURRICULUM_NAME, __semver__, (AindVrForagingTaskLogic,), pkg_location=PKG_LOCATION
 )
 CURRICULUM = curriculum_class()
 
@@ -125,23 +124,9 @@ CURRICULUM.add_stage_transition(
 TRAINER = Trainer(CURRICULUM)
 
 
-def trainer_state_from_file(path: Union[str, os.PathLike], trainer: Trainer = TRAINER) -> TrainerState:
-    return model_from_json_file(path, trainer.trainer_state_model)
-
-
-def metrics_from_dataset_path(dataset_path: Union[str, os.PathLike], trainer_state: TrainerState) -> Metrics:
-    stage = trainer_state.stage
-    if stage is None:
-        raise ValueError("Trainer state does not have a stage")
-    if stage.metrics_provider is None:
-        raise ValueError("Stage does not have a metrics provider")
-    metrics_provider = stage.metrics_provider
-    return metrics_provider.callable(dataset_path)
-
-
 def run_curriculum(args: CurriculumCliArgs) -> CurriculumSuggestion[TrainerState[Any], Any]:
     metrics: aind_behavior_curriculum.Metrics
-    trainer_state = trainer_state_from_file(args.input_trainer_state)
+    trainer_state = trainer_state_from_file(args.input_trainer_state, TRAINER)
     metrics = metrics_from_dataset_path(args.data_directory, trainer_state)
     trainer_state = TRAINER.evaluate(trainer_state, metrics)
-    return CurriculumSuggestion(trainer_state=trainer_state, metrics=metrics, version=CURRICULUM_VERSION)
+    return CurriculumSuggestion(trainer_state=trainer_state, metrics=metrics, version=__semver__)

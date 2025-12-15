@@ -8,16 +8,12 @@ from pydantic import BaseModel, Field, RootModel, SerializeAsAny
 from pydantic_settings import BaseSettings, CliApp, CliImplicitFlag, CliSubCommand
 
 from . import __version__, curricula_logger
+from .utils import model_from_json_file
 
 TModel = t.TypeVar("TModel", bound=BaseModel)
 TTrainerState = t.TypeVar("TTrainerState", bound=aind_behavior_curriculum.TrainerState)
 TMetrics = t.TypeVar("TMetrics", bound=aind_behavior_curriculum.Metrics)
 TCurriculum = t.TypeVar("TCurriculum", bound=aind_behavior_curriculum.Curriculum)
-
-
-def model_from_json_file(json_path: os.PathLike | str, model: type[TModel]) -> TModel:
-    with open(Path(json_path), "r", encoding="utf-8") as file:
-        return model.model_validate_json(file.read())
 
 
 class Version(RootModel):

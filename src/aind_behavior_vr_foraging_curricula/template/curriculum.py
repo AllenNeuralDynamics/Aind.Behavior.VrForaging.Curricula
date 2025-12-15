@@ -16,11 +16,11 @@ from aind_behavior_curriculum import (
 )
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
 
+from .. import __semver__
 from ..cli import CurriculumCliArgs, CurriculumSuggestion, model_from_json_file
 from .metrics import VrForagingTemplateMetrics
 from .stages import s_stage_a, s_stage_b
 
-CURRICULUM_VERSION = "0.1.0"
 CURRICULUM_NAME = "TemplateCurriculum"
 PKG_LOCATION = ".".join(__name__.split(".")[:-1])
 
@@ -41,7 +41,7 @@ def st_s_stage_a_s_stage_b(metrics: VrForagingTemplateMetrics) -> bool:
 # ============================================================
 
 curriculum_class: type = create_curriculum(
-    CURRICULUM_NAME, CURRICULUM_VERSION, (AindVrForagingTaskLogic,), pkg_location=PKG_LOCATION
+    CURRICULUM_NAME, __semver__, (AindVrForagingTaskLogic,), pkg_location=PKG_LOCATION
 )
 CURRICULUM = curriculum_class()
 
@@ -83,4 +83,4 @@ def run_curriculum(args: CurriculumCliArgs) -> CurriculumSuggestion[TrainerState
             trainer_state=trainer_state, metrics=metrics, dsl_version=aind_behavior_curriculum.__version__
         )
     trainer_state = TRAINER.evaluate(trainer_state, metrics)
-    return CurriculumSuggestion(trainer_state=trainer_state, metrics=metrics, version=CURRICULUM_VERSION)
+    return CurriculumSuggestion(trainer_state=trainer_state, metrics=metrics, version=__semver__)
