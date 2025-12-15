@@ -4,8 +4,9 @@ import aind_behavior_curriculum
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
 from pydantic_settings import CliApp
 
+from aind_behavior_vr_foraging_curricula import __semver__
 from aind_behavior_vr_foraging_curricula.cli import CurriculumAppCliArgs, CurriculumSuggestion
-from aind_behavior_vr_foraging_curricula.template import CURRICULUM_VERSION, __test_placeholder
+from aind_behavior_vr_foraging_curricula.template import __test_placeholder
 from aind_behavior_vr_foraging_curricula.template.curriculum import s_stage_b
 
 
@@ -37,5 +38,5 @@ def test_cli(capsys):
     assert suggestion.trainer_state.stage == s_stage_b
     assert suggestion.metrics == metrics
     assert task.task_parameters.rng_seed == s_stage_b.task.task_parameters.rng_seed
-    assert suggestion.version == CURRICULUM_VERSION
+    assert suggestion.version == __semver__
     assert suggestion.dsl_version == aind_behavior_curriculum.__version__

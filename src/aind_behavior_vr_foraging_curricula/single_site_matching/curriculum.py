@@ -12,14 +12,15 @@ from aind_behavior_curriculum import (
 )
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic
 
-from ..cli import CurriculumCliArgs, CurriculumSuggestion, model_from_json_file
+from .. import __semver__
+from ..cli import CurriculumCliArgs, CurriculumSuggestion
+from ..utils import model_from_json_file
 from .metrics import SingleSiteMatchingMetrics
 from .stages import (
     make_s_graduated_stage,
     make_s_learn_to_stop,
 )
 
-CURRICULUM_VERSION = "0.1.1"
 CURRICULUM_NAME = "SingleSiteMatching"
 PKG_LOCATION = ".".join(__name__.split(".")[:-1])
 
@@ -52,7 +53,7 @@ def st_s_learn_to_stop_to_s_graduated_stage(metrics: SingleSiteMatchingMetrics) 
 # ============================================================
 
 curriculum_class: Type[aind_behavior_curriculum.Curriculum[AindVrForagingTaskLogic]] = create_curriculum(
-    CURRICULUM_NAME, CURRICULUM_VERSION, (AindVrForagingTaskLogic,), pkg_location=PKG_LOCATION
+    CURRICULUM_NAME, __semver__, (AindVrForagingTaskLogic,), pkg_location=PKG_LOCATION
 )
 CURRICULUM = curriculum_class()
 
@@ -88,4 +89,4 @@ def run_curriculum(args: CurriculumCliArgs) -> CurriculumSuggestion[TrainerState
     trainer_state = trainer_state_from_file(args.input_trainer_state)
     metrics = metrics_from_dataset_path(args.data_directory, trainer_state)
     trainer_state = TRAINER.evaluate(trainer_state, metrics)
-    return CurriculumSuggestion(trainer_state=trainer_state, metrics=metrics, version=CURRICULUM_VERSION)
+    return CurriculumSuggestion(trainer_state=trainer_state, metrics=metrics, version=__semver__)
