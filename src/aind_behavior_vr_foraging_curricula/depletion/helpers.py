@@ -2,10 +2,10 @@ from aind_behavior_services.task_logic import distributions
 from aind_behavior_vr_foraging import task_logic
 
 
-def make_default_operation_control(time_to_collect: float, velocity_threshold: float) -> task_logic.OperationControl:
+def make_default_operation_control(velocity_threshold: float) -> task_logic.OperationControl:
     return task_logic.OperationControl(
         movable_spout_control=task_logic.MovableSpoutControl(
-            time_to_collect_after_reward=time_to_collect,
+            enabled=False,
         ),
         audio_control=task_logic.AudioControl(duration=0.2, frequency=9999),
         odor_control=task_logic.OdorControl(valve_max_open_time=10),
@@ -46,7 +46,7 @@ def make_exponential_distribution(
 ) -> distributions.ExponentialDistribution:
     return distributions.ExponentialDistribution(
         distribution_parameters=distributions.ExponentialDistributionParameters(rate=rate),
-        truncation_parameters=distributions.TruncationParameters(min=minimum, max=maximum, is_truncated=True),
+        truncation_parameters=distributions.TruncationParameters(min=minimum, max=maximum),
     )
 
 
