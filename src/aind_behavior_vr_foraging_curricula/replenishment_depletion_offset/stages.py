@@ -1,9 +1,11 @@
-from aind_behavior_curriculum import MetricsProvider, Stage
+import numpy as np
+from aind_behavior_curriculum import Stage
 from aind_behavior_vr_foraging import task_logic as vr_task_logic
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic, AindVrForagingTaskParameters
 
 from ..depletion import helpers
 from ..depletion.metrics import metrics_from_dataset
+from .policies import p_update_replenishment_rate
 from .utils import make_patch
 
 # ============================================================
@@ -20,7 +22,7 @@ replenishment_delay = [5, 5, 5]  # delay (in seconds) before replenishment start
 # Define the patch statistics for the distance
 interpatch_length = [420.0, 280.0, 140.0]  # inter-patch distance in cm
 reward_amount = 5  # microliters
-rep_rates = [0.2, 0.2, 0.2]  # replenishment rate of each patch
+rep_rates = np.array([0.2, 0.2, 0.2]) / 3.5  # replenishment rate of each patch
 num_ps_states = [16, 12, 7]  # number of discrete reward states within each patch
 rhos = [0.9, 0.9, 0.9]
 
@@ -90,5 +92,11 @@ def make_s_mcm_final_stage() -> Stage:
     return Stage(
         name="mcm_final_stage",
         task=task_logic,
-        metrics_provider=MetricsProvider(metrics_from_dataset),
+        start_policies=[p_update_replenishment_rate],
+        metrics_provider=metrics_from_dataset,
     )
+
+
+stage = make_s_mcm_final_stage()
+with open("test.json", "w") as f:
+    f.write(stage.model_dump_json(indent=4))

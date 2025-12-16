@@ -5,7 +5,7 @@ from aind_behavior_vr_foraging import task_logic as vr_task_logic
 from scipy.linalg import expm
 
 
-def compute_cmc_transition_probability(n_states, rep_rate, T=3.5, dt=0.1) -> np.ndarray:
+def compute_cmc_transition_probability(n_states: int, rep_rate: float, dt: float = 0.1) -> np.ndarray:
     """
      Computes the replenishment transition probability matrix for each patch
     Parameters
@@ -27,14 +27,27 @@ def compute_cmc_transition_probability(n_states, rep_rate, T=3.5, dt=0.1) -> np.
     """
 
     q = np.zeros((n_states, n_states))
-    np.fill_diagonal(q, -rep_rate / T)
-    np.fill_diagonal(q[:, 1:], rep_rate / T)
+    np.fill_diagonal(q, -rep_rate)
+    np.fill_diagonal(q[:, 1:], rep_rate)
     q[-1, -1] = 0
 
     # compute replenishment probability function dependent on replenishment time (here experiment dt)
     p_t = expm(q * dt)
     assert p_t.ndim == 2
     return p_t
+
+
+def make_patch_replenishment_function(
+    n_states: int, replenishment_rate: float, p_reward_max: float, p_reward_min: float, rho: float
+) -> vr_task_logic.CtcmFunction:
+    return vr_task_logic.CtcmFunction(
+        transition_matrix=cast(
+            list[list[float]], compute_cmc_transition_probability(n_states, replenishment_rate).tolist()
+        ),
+        maximum=p_reward_max,
+        minimum=p_reward_min,
+        rho=rho,
+    )
 
 
 def make_patch(
@@ -59,14 +72,7 @@ def make_patch(
     )
 
     replenishment = vr_task_logic.OutsideRewardFunction(
-        probability=vr_task_logic.CtcmFunction(
-            transition_matrix=cast(
-                list[list[float]], compute_cmc_transition_probability(n_states, replenishment_rate).tolist()
-            ),
-            maximum=p_reward_max,
-            minimum=p_reward_min,
-            rho=rho,
-        ),
+        probability=make_patch_replenishment_function(n_states, replenishment_rate, p_reward_max, p_reward_min, rho),
         delay=replenishment_delay,
         rule=vr_task_logic.RewardFunctionRule.ON_TIME,
     )
