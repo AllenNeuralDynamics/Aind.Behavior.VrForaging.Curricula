@@ -16,7 +16,7 @@ def s_stage_all_odors_rewarded() -> Stage:
         task=AindVrForagingTaskLogic(
             stage_name="all_odors_rewarded_stops_rate",
             task_parameters=AindVrForagingTaskParameters(
-                operation_control=helpers.make_default_operation_control(time_to_collect=99999, velocity_threshold=8),
+                operation_control=helpers.make_default_operation_control(velocity_threshold=8),
                 environment=task_logic.BlockStructure(
                     blocks=[
                         task_logic.Block(
@@ -58,7 +58,7 @@ def s_stage_graduation() -> Stage:
         task=AindVrForagingTaskLogic(
             stage_name="graduation_stops_rate",
             task_parameters=AindVrForagingTaskParameters(
-                operation_control=helpers.make_default_operation_control(time_to_collect=99999, velocity_threshold=8),
+                operation_control=helpers.make_default_operation_control(velocity_threshold=8),
                 environment=task_logic.BlockStructure(
                     blocks=[
                         task_logic.Block(

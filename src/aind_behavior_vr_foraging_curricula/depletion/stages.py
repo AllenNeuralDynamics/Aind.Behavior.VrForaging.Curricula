@@ -42,7 +42,7 @@ def make_s_stage_one_odor_no_depletion() -> Stage:
             stage_name="one_odor_no_depletion",
             task_parameters=AindVrForagingTaskParameters(
                 updaters=_updaters,
-                operation_control=helpers.make_default_operation_control(time_to_collect=99999, velocity_threshold=60),
+                operation_control=helpers.make_default_operation_control(velocity_threshold=60),
                 environment=task_logic.BlockStructure(
                     blocks=[
                         task_logic.Block(
@@ -123,7 +123,7 @@ def _make_s_stage_one_odor_w_depletion_parameters() -> AindVrForagingTaskParamet
                 ),
             ),
         },
-        operation_control=helpers.make_default_operation_control(time_to_collect=99999, velocity_threshold=8),
+        operation_control=helpers.make_default_operation_control(velocity_threshold=8),
         environment=task_logic.BlockStructure(
             blocks=[
                 task_logic.Block(
@@ -175,7 +175,7 @@ def make_s_stage_all_odors_rewarded() -> Stage:
         task=AindVrForagingTaskLogic(
             stage_name="all_odors_rewarded",
             task_parameters=AindVrForagingTaskParameters(
-                operation_control=helpers.make_default_operation_control(time_to_collect=99999, velocity_threshold=8),
+                operation_control=helpers.make_default_operation_control(velocity_threshold=8),
                 environment=task_logic.BlockStructure(
                     blocks=[
                         task_logic.Block(
@@ -207,7 +207,7 @@ def make_s_stage_graduation() -> Stage:
         task=AindVrForagingTaskLogic(
             stage_name="graduation",
             task_parameters=AindVrForagingTaskParameters(
-                operation_control=helpers.make_default_operation_control(time_to_collect=99999, velocity_threshold=8),
+                operation_control=helpers.make_default_operation_control(velocity_threshold=8),
                 environment=task_logic.BlockStructure(
                     blocks=[
                         task_logic.Block(
