@@ -1,4 +1,3 @@
-import numpy as np
 from aind_behavior_curriculum import Stage
 from aind_behavior_vr_foraging import task_logic as vr_task_logic
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic, AindVrForagingTaskParameters
@@ -13,16 +12,16 @@ from .utils import make_patch
 # ============================================================
 p_maxs = [
     1.0,
-    0.7,
+    0.8,
     0.4,
 ]  # maximum reward probability of each patch, in order for patch A, B and C (they come in order A, B, C, A, ...)
-p_min = [0.2, 0.2, 0.2]  # minimum reward probability only used for stopping depletion
-dep_rates = [0.9, 0.81, 0.729]  # depletion rate of each patch
+p_min = [0.3, 0.3, 0.3]  # minimum reward probability only used for stopping depletion
+dep_rates = [0.9, 0.9, 0.9]  # depletion rate of each patch
 replenishment_delay = [5, 5, 5]  # delay (in seconds) before replenishment starts for each patch
 # Define the patch statistics for the distance
-interpatch_length = [420.0, 280.0, 140.0]  # inter-patch distance in cm
+interpatch_length = [140.0, 140.0, 140.0]  # inter-patch distance in cm
 reward_amount = 5  # microliters
-rep_rates = np.array([0.2, 0.2, 0.2]) / 3.5  # replenishment rate of each patch
+rep_rates = [0.1, 0.1, 0.1]  # replenishment rate of each patch (already scaled)
 num_ps_states = [16, 12, 7]  # number of discrete reward states within each patch
 rhos = [0.9, 0.9, 0.9]
 
@@ -95,8 +94,3 @@ def make_s_mcm_final_stage() -> Stage:
         start_policies=[p_update_replenishment_rate],
         metrics_provider=metrics_from_dataset,
     )
-
-
-stage = make_s_mcm_final_stage()
-with open("test.json", "w") as f:
-    f.write(stage.model_dump_json(indent=4))
