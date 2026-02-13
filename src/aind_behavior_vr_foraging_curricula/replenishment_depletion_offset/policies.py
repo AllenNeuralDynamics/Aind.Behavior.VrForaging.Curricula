@@ -31,7 +31,7 @@ def p_update_replenishment_rate(
     TARGET_MIN_WATER = 700
     water_consumed = clamp(metrics.total_water_consumed, TARGET_MIN_WATER, TARGET_MAX_WATER)
     # Linearly interpolate replenishment rate based on water consumed
-    gain_from_water = (
+    gain_from_water = 1.0 - (
         (TARGET_MAX_WATER - water_consumed) / (TARGET_MAX_WATER - TARGET_MIN_WATER) * MAX_RATE_DROP_PER_SESSION
     )
 
