@@ -48,6 +48,9 @@ def st_s_stage_one_odor_w_depletion_day_1_s_stage_mcm_final_stage(metrics: Deple
     return metrics.n_patches_visited > 20
 
 
+def st_s_stage_one_odor_w_depletion_day_0_s_stage_mcm_final_stage(metrics: DepletionCurriculumMetrics) -> bool:
+    return metrics.n_patches_visited > 40
+
 CURRICULUM.add_stage_transition(
     make_s_stage_one_odor_no_depletion(),
     make_s_stage_one_odor_w_depletion_day_0(),
