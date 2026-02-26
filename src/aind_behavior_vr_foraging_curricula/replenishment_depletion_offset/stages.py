@@ -30,7 +30,7 @@ def make_s_mcm_final_stage() -> Stage:
     patch1 = make_patch(
         label="High",
         state_index=0,
-        odor_index=0,
+        odor_index=2,
         p_reward_max=p_maxs[0],
         p_reward_min=p_min[0],
         depletion_rate=dep_rates[0],
@@ -58,7 +58,7 @@ def make_s_mcm_final_stage() -> Stage:
     patch3 = make_patch(
         label="Low",
         state_index=2,
-        odor_index=2,
+        odor_index=0,
         p_reward_max=p_maxs[2],
         p_reward_min=p_min[2],
         depletion_rate=dep_rates[2],
