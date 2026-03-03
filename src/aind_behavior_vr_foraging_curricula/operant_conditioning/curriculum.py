@@ -15,20 +15,15 @@ from ..cli import CurriculumCliArgs, CurriculumSuggestion
 from ..depletion.curriculum import (
     metrics_from_dataset_path,
     st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0,
-    st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1,
-    st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded,
-    st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0,
     trainer_state_from_file,
 )
 from ..depletion.metrics import DepletionCurriculumMetrics
 from ..depletion.stages import (
     make_s_stage_one_odor_no_depletion,
-    make_s_stage_one_odor_w_depletion_day_0,
-    make_s_stage_one_odor_w_depletion_day_1,
 )
-from .stages import make_s_mcm_final_stage
+from .stages import make_s_stage_a100_b100_c0, make_s_stage_b100_c0, make_s_stage_reversals
 
-CURRICULUM_NAME = "ReplenishmentDepletionOffset"
+CURRICULUM_NAME = "OperantConditioning"
 PKG_LOCATION = ".".join(__name__.split(".")[:-1])
 
 TModel = TypeVar("TModel", bound=pydantic.BaseModel)
@@ -44,36 +39,26 @@ curriculum_class: Type[aind_behavior_curriculum.Curriculum[AindVrForagingTaskLog
 CURRICULUM = curriculum_class()
 
 
-def st_s_stage_one_odor_w_depletion_day_1_s_stage_mcm_final_stage(metrics: DepletionCurriculumMetrics) -> bool:
-    return metrics.n_patches_visited > 20
-
-
-def st_s_stage_one_odor_w_depletion_day_0_s_stage_mcm_final_stage(metrics: DepletionCurriculumMetrics) -> bool:
-    return metrics.n_patches_visited > 40
+def st_never(metrics: DepletionCurriculumMetrics) -> bool:
+    return False
 
 
 CURRICULUM.add_stage_transition(
     make_s_stage_one_odor_no_depletion(),
-    make_s_stage_one_odor_w_depletion_day_0(),
+    make_s_stage_a100_b100_c0(),
     StageTransition(st_s_stage_one_odor_no_depletion_s_stage_one_odor_w_depletion_day_0),
 )
 
 CURRICULUM.add_stage_transition(
-    make_s_stage_one_odor_w_depletion_day_0(),
-    make_s_stage_one_odor_w_depletion_day_1(),
-    StageTransition(st_s_stage_one_odor_w_depletion_day_0_s_stage_one_odor_w_depletion_day_1),
+    make_s_stage_a100_b100_c0(),
+    make_s_stage_b100_c0(),
+    StageTransition(st_never),
 )
 
 CURRICULUM.add_stage_transition(
-    make_s_stage_one_odor_w_depletion_day_1(),
-    make_s_stage_one_odor_w_depletion_day_0(),
-    StageTransition(st_s_stage_one_odor_w_depletion_day_1_s_stage_one_odor_w_depletion_day_0),
-)
-
-CURRICULUM.add_stage_transition(
-    make_s_stage_one_odor_w_depletion_day_1(),
-    make_s_mcm_final_stage(),
-    StageTransition(st_s_stage_one_odor_w_depletion_day_1_s_stage_all_odors_rewarded),
+    make_s_stage_b100_c0(),
+    make_s_stage_reversals(),
+    StageTransition(st_never),
 )
 
 # ==============================================================================
