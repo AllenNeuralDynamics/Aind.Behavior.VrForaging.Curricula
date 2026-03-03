@@ -8,47 +8,191 @@
 
 A repository of curricula for [VR foraging task](https://github.com/AllenNeuralDynamics/Aind.Behavior.VrForaging).
 
-## How to run a specific curriculum?
+## CLI Reference
 
 Curricula are modules of the main package: `aind_behavior_vr_foraging_curricula.<curriculum_name>`. 
 
-All curricula are available via the `curriculum` cli entry point. Available list of commands is printed with the `-h` flag:
+All curricula are available via the `curriculum` CLI entry point. The following commands are available:
+
+### Getting Help
+
+Display all available commands:
 
 ```bash
 uv run curriculum -h
 ```
 
-### List available curricula
+Get help for a specific command:
 
-Available curricula can be listed from the cli using:
+```bash
+uv run curriculum <command> -h
+```
+
+### `list` - List Available Curricula
+
+Lists all curricula available in this repository.
+
+**Usage:**
 
 ```bash
 uv run curriculum list
 ```
 
-### Running a curriculum
-
-Curricula can be run using the `run` subcommand of the `curriculum` cli entry point.
-
-```bash
-uv run curriculum run -h
+**Example output:**
+```
+Available curricula:
+ - depletion
+ - depletion_stops_offset
+ - depletion_stops_rate
+ - operant_conditioning
+ - single_site_matching
+ - template
 ```
 
-The following arguments are available for the `run` subcommand:
+### `init` - Initialize a Curriculum
 
-* `--data-directory`: Path to the session data directory that will be used to calculate metrics (required)
-* `--input-trainer-state`: Path to a deserialized json file with the current trainer state (required)
-* `--mute-suggestion`: Disables the suggestion output (optional)
-* `--output-suggestion`: A path to save the serialized suggestion (optional)
-* `--curriculum`: The name of the curriculum to run (optional)
+Creates an initial trainer state for enrolling a subject in a curriculum. This generates the starting point for curriculum execution.
 
-For a quick "demo" to ensure everything is working, you can run:
-    
+**Required Arguments:**
+- `--curriculum <name>`: The curriculum to enroll in (required)
+
+**Optional Arguments:**
+- `--output <path>`: Path to save the enrollment trainer state as a JSON file
+- `--stage <name>`: If provided, enroll at a specific stage instead of the first stage
+
+**Examples:**
+
+Initialize the depletion curriculum (starts at first stage):
+
 ```bash
-uv run curriculum run --data-directory "demo" --input-trainer-state "foo.json" --curriculum "template"
+uv run curriculum init --curriculum depletion --output initial_state.json
 ```
 
-For real-world applications, you may want to omit the "--curriculum" flag and let the system automatically detect the curriculum from the trainer state.
+Initialize at a specific stage:
+
+```bash
+uv run curriculum init --curriculum depletion --stage stage_one_odor_no_depletion --output initial_state.json
+```
+
+Print to stdout without saving:
+
+```bash
+uv run curriculum init --curriculum operant_conditioning
+```
+
+### `run` - Run a Curriculum
+
+Evaluates a curriculum based on session data and the current trainer state, producing a suggestion for the next stage.
+
+**Required Arguments:**
+- `--data-directory <path>`: Path to the session data directory for calculating metrics
+- `--input-trainer-state <path>`: Path to the current trainer state JSON file
+
+**Optional Arguments:**
+- `--curriculum <name>`: Forces the use of a specific curriculum, bypassing automatic detection
+- `--output-suggestion <path>`: Directory path to save the suggestion as `suggestion.json`
+- `--mute-suggestion`: Disables printing the suggestion to stdout (useful when only saving to file)
+
+**Examples:**
+
+Run curriculum with automatic detection:
+
+```bash
+uv run curriculum run \
+  --data-directory /path/to/session/data \
+  --input-trainer-state current_state.json \
+  --output-suggestion /path/to/output
+```
+
+Force a specific curriculum:
+
+```bash
+uv run curriculum run \
+  --data-directory /path/to/session/data \
+  --input-trainer-state current_state.json \
+  --curriculum depletion \
+  --output-suggestion /path/to/output
+```
+
+Run without saving (print to stdout only):
+
+```bash
+uv run curriculum run \
+  --data-directory /path/to/session/data \
+  --input-trainer-state current_state.json
+```
+
+Run and save without printing:
+
+```bash
+uv run curriculum run \
+  --data-directory /path/to/session/data \
+  --input-trainer-state current_state.json \
+  --output-suggestion /path/to/output \
+  --mute-suggestion
+```
+
+Quick demo with template curriculum:
+
+```bash
+uv run curriculum run \
+  --data-directory "demo" \
+  --input-trainer-state "foo.json" \
+  --curriculum "template"
+```
+
+### `version` - Show Package Version
+
+Displays the version of this package.
+
+**Usage:**
+
+```bash
+uv run curriculum version
+```
+
+**Example output:**
+```
+0.2.0
+```
+
+### `dsl-version` - Show DSL Version
+
+Displays the version of the underlying `aind-behavior-curriculum` DSL library.
+
+**Usage:**
+
+```bash
+uv run curriculum dsl-version
+```
+
+**Example output:**
+```
+0.0.37
+```
+
+## Typical Workflow
+
+1. **List available curricula:**
+   ```bash
+   uv run curriculum list
+   ```
+
+2. **Initialize a subject in a curriculum:**
+   ```bash
+   uv run curriculum init --curriculum depletion --output trainer_state.json
+   ```
+
+3. **After a training session, evaluate progress:**
+   ```bash
+   uv run curriculum run \
+     --data-directory /path/to/session/data \
+     --input-trainer-state trainer_state.json \
+     --output-suggestion /path/to/output
+   ```
+
+4. **Use the suggestion output for the next session:**
+   The `suggestion.json` file contains the updated trainer state and can be used as `--input-trainer-state` for the next session.
 
 
 ## Style guide
