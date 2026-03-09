@@ -21,8 +21,8 @@ classifiers = [
 readme = {file = "README.md", content-type = "text/markdown"}
 
 dependencies = [
-    "aind-behavior-vr-foraging[data] >= 0.6.3",
-    "aind-behavior-curriculum >= 0.0.37",
+    "aind-behavior-vr-foraging[data] >= 0.6.7",
+    "aind-behavior-curriculum >= 0.0.38",
     "pydantic-settings",
 ]
 
