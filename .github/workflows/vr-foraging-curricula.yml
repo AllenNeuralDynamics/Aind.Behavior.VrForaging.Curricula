@@ -60,6 +60,8 @@ jobs:
     needs: tests
     if: github.event_name == 'release' && github.event.action == 'published' &&
       !github.event.release.prerelease
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -90,6 +92,11 @@ jobs:
           git add .
           git commit -m "Set version and regenerate schemas" || echo "No changes to commit"
           git push origin main
+
+      - name: Move release tag to new commit
+        run: |
+          git tag -f ${{ github.event.release.tag_name }}
+          git push --force origin ${{ github.event.release.tag_name }}
 
   # ╔─────────────────────────╗
   # │   ____                  │
