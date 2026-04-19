@@ -1,5 +1,4 @@
 import importlib
-import json
 import pathlib
 
 from aind_behavior_curriculum import Curriculum
@@ -11,10 +10,10 @@ def main(root: str = "./schema", dry_run: bool = False) -> None:
     pathlib.Path(root).mkdir(parents=True, exist_ok=True)
     for curriculum in _KNOWN_CURRICULA:
         module = importlib.import_module(f"aind_behavior_vr_foraging_curricula.{curriculum}")
-        curriculum_cls: Curriculum | None = getattr(module, "CURRICULUM", None)
-        if curriculum_cls is None:
+        curriculum_instance: Curriculum | None = getattr(module, "CURRICULUM", None)
+        if curriculum_instance is None:
             raise ValueError(f"Curriculum not found in module {module}")
-        serialized_schema = json.dumps(curriculum_cls.model_json_schema(), indent=4)
+        serialized_schema = curriculum_instance.model_dump_json(indent=4)
         if not dry_run:
             with open(pathlib.Path(root) / f"{curriculum}.json", "w", encoding="utf-8") as f:
                 f.write(serialized_schema)
