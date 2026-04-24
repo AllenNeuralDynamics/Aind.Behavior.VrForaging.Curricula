@@ -80,7 +80,10 @@ def make_patch(
                 length_distribution=vr_task_logic.scalar_value(40.0),
             ),
         ),
-        patch_terminators=[vr_task_logic.PatchTerminatorOnChoice(count=1)],
+        patch_terminators=[
+            vr_task_logic.PatchTerminatorOnChoice(count=1),
+            vr_task_logic.PatchTerminatorOnRejection(count=1),
+        ],
     )
 
 
