@@ -1,7 +1,7 @@
 {
     "pkg_location": "aind_behavior_vr_foraging_curricula.operant_conditioning",
     "name": "OperantConditioning",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "graph": {
         "nodes": {
             "0": {
@@ -471,6 +471,18 @@
                                                             "truncation_parameters": null,
                                                             "scaling_parameters": null
                                                         }
+                                                    },
+                                                    {
+                                                        "terminator_type": "OnRejection",
+                                                        "count": {
+                                                            "family": "Scalar",
+                                                            "distribution_parameters": {
+                                                                "family": "Scalar",
+                                                                "value": 1.0
+                                                            },
+                                                            "truncation_parameters": null,
+                                                            "scaling_parameters": null
+                                                        }
                                                     }
                                                 ]
                                             },
@@ -604,6 +616,18 @@
                                                             "truncation_parameters": null,
                                                             "scaling_parameters": null
                                                         }
+                                                    },
+                                                    {
+                                                        "terminator_type": "OnRejection",
+                                                        "count": {
+                                                            "family": "Scalar",
+                                                            "distribution_parameters": {
+                                                                "family": "Scalar",
+                                                                "value": 1.0
+                                                            },
+                                                            "truncation_parameters": null,
+                                                            "scaling_parameters": null
+                                                        }
                                                     }
                                                 ]
                                             },
@@ -728,6 +752,18 @@
                                                 "patch_terminators": [
                                                     {
                                                         "terminator_type": "OnChoice",
+                                                        "count": {
+                                                            "family": "Scalar",
+                                                            "distribution_parameters": {
+                                                                "family": "Scalar",
+                                                                "value": 1.0
+                                                            },
+                                                            "truncation_parameters": null,
+                                                            "scaling_parameters": null
+                                                        }
+                                                    },
+                                                    {
+                                                        "terminator_type": "OnRejection",
                                                         "count": {
                                                             "family": "Scalar",
                                                             "distribution_parameters": {
@@ -955,6 +991,18 @@
                                                             "truncation_parameters": null,
                                                             "scaling_parameters": null
                                                         }
+                                                    },
+                                                    {
+                                                        "terminator_type": "OnRejection",
+                                                        "count": {
+                                                            "family": "Scalar",
+                                                            "distribution_parameters": {
+                                                                "family": "Scalar",
+                                                                "value": 1.0
+                                                            },
+                                                            "truncation_parameters": null,
+                                                            "scaling_parameters": null
+                                                        }
                                                     }
                                                 ]
                                             },
@@ -1088,6 +1136,18 @@
                                                             "truncation_parameters": null,
                                                             "scaling_parameters": null
                                                         }
+                                                    },
+                                                    {
+                                                        "terminator_type": "OnRejection",
+                                                        "count": {
+                                                            "family": "Scalar",
+                                                            "distribution_parameters": {
+                                                                "family": "Scalar",
+                                                                "value": 1.0
+                                                            },
+                                                            "truncation_parameters": null,
+                                                            "scaling_parameters": null
+                                                        }
                                                     }
                                                 ]
                                             },
@@ -1212,6 +1272,18 @@
                                                 "patch_terminators": [
                                                     {
                                                         "terminator_type": "OnChoice",
+                                                        "count": {
+                                                            "family": "Scalar",
+                                                            "distribution_parameters": {
+                                                                "family": "Scalar",
+                                                                "value": 1.0
+                                                            },
+                                                            "truncation_parameters": null,
+                                                            "scaling_parameters": null
+                                                        }
+                                                    },
+                                                    {
+                                                        "terminator_type": "OnRejection",
                                                         "count": {
                                                             "family": "Scalar",
                                                             "distribution_parameters": {
@@ -1439,6 +1511,18 @@
                                                             "truncation_parameters": null,
                                                             "scaling_parameters": null
                                                         }
+                                                    },
+                                                    {
+                                                        "terminator_type": "OnRejection",
+                                                        "count": {
+                                                            "family": "Scalar",
+                                                            "distribution_parameters": {
+                                                                "family": "Scalar",
+                                                                "value": 1.0
+                                                            },
+                                                            "truncation_parameters": null,
+                                                            "scaling_parameters": null
+                                                        }
                                                     }
                                                 ]
                                             },
@@ -1572,6 +1656,18 @@
                                                             "truncation_parameters": null,
                                                             "scaling_parameters": null
                                                         }
+                                                    },
+                                                    {
+                                                        "terminator_type": "OnRejection",
+                                                        "count": {
+                                                            "family": "Scalar",
+                                                            "distribution_parameters": {
+                                                                "family": "Scalar",
+                                                                "value": 1.0
+                                                            },
+                                                            "truncation_parameters": null,
+                                                            "scaling_parameters": null
+                                                        }
                                                     }
                                                 ]
                                             },
@@ -1696,6 +1792,18 @@
                                                 "patch_terminators": [
                                                     {
                                                         "terminator_type": "OnChoice",
+                                                        "count": {
+                                                            "family": "Scalar",
+                                                            "distribution_parameters": {
+                                                                "family": "Scalar",
+                                                                "value": 1.0
+                                                            },
+                                                            "truncation_parameters": null,
+                                                            "scaling_parameters": null
+                                                        }
+                                                    },
+                                                    {
+                                                        "terminator_type": "OnRejection",
                                                         "count": {
                                                             "family": "Scalar",
                                                             "distribution_parameters": {
@@ -1887,6 +1995,18 @@
                                                             "truncation_parameters": null,
                                                             "scaling_parameters": null
                                                         }
+                                                    },
+                                                    {
+                                                        "terminator_type": "OnRejection",
+                                                        "count": {
+                                                            "family": "Scalar",
+                                                            "distribution_parameters": {
+                                                                "family": "Scalar",
+                                                                "value": 1.0
+                                                            },
+                                                            "truncation_parameters": null,
+                                                            "scaling_parameters": null
+                                                        }
                                                     }
                                                 ]
                                             },
@@ -2020,6 +2140,18 @@
                                                             "truncation_parameters": null,
                                                             "scaling_parameters": null
                                                         }
+                                                    },
+                                                    {
+                                                        "terminator_type": "OnRejection",
+                                                        "count": {
+                                                            "family": "Scalar",
+                                                            "distribution_parameters": {
+                                                                "family": "Scalar",
+                                                                "value": 1.0
+                                                            },
+                                                            "truncation_parameters": null,
+                                                            "scaling_parameters": null
+                                                        }
                                                     }
                                                 ]
                                             },
@@ -2144,6 +2276,18 @@
                                                 "patch_terminators": [
                                                     {
                                                         "terminator_type": "OnChoice",
+                                                        "count": {
+                                                            "family": "Scalar",
+                                                            "distribution_parameters": {
+                                                                "family": "Scalar",
+                                                                "value": 1.0
+                                                            },
+                                                            "truncation_parameters": null,
+                                                            "scaling_parameters": null
+                                                        }
+                                                    },
+                                                    {
+                                                        "terminator_type": "OnRejection",
                                                         "count": {
                                                             "family": "Scalar",
                                                             "distribution_parameters": {
