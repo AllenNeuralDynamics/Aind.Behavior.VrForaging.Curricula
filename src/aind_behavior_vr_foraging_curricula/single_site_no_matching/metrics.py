@@ -24,8 +24,8 @@ class SingleSiteNoMatchingMetrics(Metrics):
     last_stop_threshold_updater: NonNegativeFloat | None = Field(
         description="The stop velocity threshold at the end of the session."
     )
-    last_stop_duration_offset_updater: NonNegativeFloat | None = Field(
-        description="The stop duration offset at the end of the session."
+    last_stop_duration_offset_updater: float | None = Field(
+        description="The stop duration offset at the end of the session. May be negative in S3 where stop is ramped down as reward delay grows."
     )
     last_reward_delay_offset_updater: NonNegativeFloat | None = Field(
         description="The reward delay offset at the end of the session."

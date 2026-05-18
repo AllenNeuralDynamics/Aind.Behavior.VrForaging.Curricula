@@ -21,7 +21,8 @@ from .stages import (
     make_s_graduated_stage,
     make_s_learn_to_choose,
     make_s_learn_to_stop,
-    make_s_three_value_grid,
+    make_s_learn_to_stop_low_p,
+    make_s_three_contrast,
 )
 
 CURRICULUM_NAME = "SingleSiteNoMatching"
@@ -35,23 +36,34 @@ TModel = TypeVar("TModel", bound=pydantic.BaseModel)
 # ============================================================
 
 
-def st_s_learn_to_stop_to_s_learn_to_choose(metrics: SingleSiteNoMatchingMetrics) -> bool:
+def _learn_to_stop_saturation_met(metrics: SingleSiteNoMatchingMetrics) -> bool:
     if metrics.last_stop_threshold_updater is None:
         return False
     if metrics.last_stop_duration_offset_updater is None:
         return False
-
-    if (
+    return (
         (metrics.last_stop_threshold_updater <= 8)
         and (metrics.last_stop_duration_offset_updater >= 1.0)
         and (metrics.n_patches_seen >= 300)
         and (metrics.n_patches_visited >= 150)
-    ):
-        return True
-    return False
+    )
 
 
-def st_s_learn_to_choose_to_s_three_value_grid(metrics: SingleSiteNoMatchingMetrics) -> bool:
+def st_s_learn_to_stop_to_s_learn_to_choose(metrics: SingleSiteNoMatchingMetrics) -> bool:
+    return _learn_to_stop_saturation_met(metrics)
+
+
+def st_s_learn_to_stop_to_s_learn_to_stop_low_p(metrics: SingleSiteNoMatchingMetrics) -> bool:
+    # Unconditional fallback: any animal that doesn't pass straight to S2 ends up here
+    # after one session of high-p_reward shaping.
+    return True
+
+
+def st_s_learn_to_stop_low_p_to_s_learn_to_choose(metrics: SingleSiteNoMatchingMetrics) -> bool:
+    return _learn_to_stop_saturation_met(metrics)
+
+
+def st_s_learn_to_choose_to_s_three_contrast(metrics: SingleSiteNoMatchingMetrics) -> bool:
     if metrics.last_reward_delay_offset_updater is None:
         return False
     if metrics.n_patches_seen == 0:
@@ -61,7 +73,6 @@ def st_s_learn_to_choose_to_s_three_value_grid(metrics: SingleSiteNoMatchingMetr
     if (
         (metrics.n_patches_seen >= 200)
         and (metrics.n_patches_visited >= 50)
-        and (metrics.total_water_consumed >= 0.4)
         and (visit_ratio <= 0.7)
         and (metrics.last_reward_delay_offset_updater >= 0.25)
     ):
@@ -69,8 +80,10 @@ def st_s_learn_to_choose_to_s_three_value_grid(metrics: SingleSiteNoMatchingMetr
     return False
 
 
-def st_s_three_value_grid_to_s_graduated_narrow_delay(metrics: SingleSiteNoMatchingMetrics) -> bool:
+def st_s_three_contrast_to_s_graduated_narrow_delay(metrics: SingleSiteNoMatchingMetrics) -> bool:
     if metrics.last_reward_delay_offset_updater is None:
+        return False
+    if metrics.last_stop_duration_offset_updater is None:
         return False
     if metrics.n_patches_seen == 0:
         return False
@@ -79,9 +92,9 @@ def st_s_three_value_grid_to_s_graduated_narrow_delay(metrics: SingleSiteNoMatch
     if (
         (metrics.n_patches_seen >= 250)
         and (metrics.n_patches_visited >= 80)
-        and (metrics.total_water_consumed >= 0.5)
         and (0.3 <= visit_ratio <= 0.7)
         and (metrics.last_reward_delay_offset_updater >= 1.3)
+        and (metrics.last_stop_duration_offset_updater <= -0.4)
     ):
         return True
     return False
@@ -92,12 +105,7 @@ def st_s_graduated_narrow_delay_to_s_graduated_stage(metrics: SingleSiteNoMatchi
         return False
 
     visit_ratio = metrics.n_patches_visited / metrics.n_patches_seen
-    if (
-        (metrics.n_patches_seen >= 300)
-        and (metrics.n_patches_visited >= 100)
-        and (metrics.total_water_consumed >= 0.6)
-        and (0.3 <= visit_ratio <= 0.7)
-    ):
+    if (metrics.n_patches_seen >= 300) and (metrics.n_patches_visited >= 100) and (0.3 <= visit_ratio <= 0.7):
         return True
     return False
 
@@ -116,15 +124,26 @@ CURRICULUM.add_stage_transition(
     make_s_learn_to_choose(),
     StageTransition(st_s_learn_to_stop_to_s_learn_to_choose),
 )
+# Lower-priority fallback for animals that didn't graduate S1 in one session.
 CURRICULUM.add_stage_transition(
-    make_s_learn_to_choose(),
-    make_s_three_value_grid(),
-    StageTransition(st_s_learn_to_choose_to_s_three_value_grid),
+    make_s_learn_to_stop(),
+    make_s_learn_to_stop_low_p(),
+    StageTransition(st_s_learn_to_stop_to_s_learn_to_stop_low_p),
 )
 CURRICULUM.add_stage_transition(
-    make_s_three_value_grid(),
+    make_s_learn_to_stop_low_p(),
+    make_s_learn_to_choose(),
+    StageTransition(st_s_learn_to_stop_low_p_to_s_learn_to_choose),
+)
+CURRICULUM.add_stage_transition(
+    make_s_learn_to_choose(),
+    make_s_three_contrast(),
+    StageTransition(st_s_learn_to_choose_to_s_three_contrast),
+)
+CURRICULUM.add_stage_transition(
+    make_s_three_contrast(),
     make_s_graduated_narrow_delay(),
-    StageTransition(st_s_three_value_grid_to_s_graduated_narrow_delay),
+    StageTransition(st_s_three_contrast_to_s_graduated_narrow_delay),
 )
 CURRICULUM.add_stage_transition(
     make_s_graduated_narrow_delay(),

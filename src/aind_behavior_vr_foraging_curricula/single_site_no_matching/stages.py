@@ -6,7 +6,7 @@ from aind_behavior_curriculum import MetricsProvider, Policy, Stage
 from aind_behavior_vr_foraging.task_logic import AindVrForagingTaskLogic, AindVrForagingTaskParameters
 
 from .metrics import metrics_from_dataset
-from .policies import p_learn_to_stop, p_seed_reward_delay
+from .policies import p_learn_to_stop, p_seed_reward_delay, p_seed_stop_duration
 
 
 def make_patch(
@@ -15,7 +15,7 @@ def make_patch(
     odor_index: int,
     p_reward: float,
     stop_duration: float = 0.5,
-    reward_amount: float = 5.0,
+    reward_amount: float = 3.3,
     inter_site_length: float = 15,
     reward_site_length: float = 40,
     inter_patch_min_length: float = 50,
@@ -155,50 +155,67 @@ def make_operation_control(velocity_threshold: float) -> vr_task_logic.Operation
 # ============================================================
 
 
+def _make_learn_to_stop_task(p_reward: float, stage_name: str) -> AindVrForagingTaskLogic:
+    return AindVrForagingTaskLogic(
+        stage_name=stage_name,
+        task_parameters=AindVrForagingTaskParameters(
+            rng_seed=None,
+            updaters={
+                vr_task_logic.UpdaterTarget.STOP_DURATION_OFFSET: vr_task_logic.NumericalUpdater(
+                    operation=vr_task_logic.NumericalUpdaterOperation.OFFSET,
+                    parameters=vr_task_logic.NumericalUpdaterParameters(
+                        initial_value=0, on_success=0.0067, minimum=0, maximum=1.0
+                    ),
+                ),
+                vr_task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD: vr_task_logic.NumericalUpdater(
+                    operation=vr_task_logic.NumericalUpdaterOperation.GAIN,
+                    parameters=vr_task_logic.NumericalUpdaterParameters(
+                        initial_value=60,
+                        on_success=0.987,
+                        minimum=8,
+                        maximum=60,
+                    ),
+                ),
+            },
+            environment=vr_task_logic.BlockStructure(
+                blocks=[
+                    make_block(
+                        p_rew=(p_reward, p_reward, None),
+                        n_min_patches=100000,
+                        make_patch_kwargs={
+                            "inter_patch_min_length": 50,
+                            "inter_patch_mean_length": 120,
+                            "inter_patch_max_length": 150,
+                            "inter_site_length": 15,
+                            "reward_site_length": 40,
+                        },
+                    ),
+                ],
+                sampling_mode="Sequential",
+            ),
+            operation_control=make_operation_control(velocity_threshold=60),
+        ),
+    )
+
+
 def make_s_learn_to_stop() -> Stage:
     return Stage(
         name="learn_to_stop",
-        task=AindVrForagingTaskLogic(
-            stage_name="learn_to_stop",
-            task_parameters=AindVrForagingTaskParameters(
-                rng_seed=None,
-                updaters={
-                    vr_task_logic.UpdaterTarget.STOP_DURATION_OFFSET: vr_task_logic.NumericalUpdater(
-                        operation=vr_task_logic.NumericalUpdaterOperation.OFFSET,
-                        parameters=vr_task_logic.NumericalUpdaterParameters(
-                            initial_value=0, on_success=0.005, minimum=0, maximum=1.0
-                        ),
-                    ),
-                    vr_task_logic.UpdaterTarget.STOP_VELOCITY_THRESHOLD: vr_task_logic.NumericalUpdater(
-                        operation=vr_task_logic.NumericalUpdaterOperation.GAIN,
-                        parameters=vr_task_logic.NumericalUpdaterParameters(
-                            initial_value=60,
-                            on_success=0.995,
-                            minimum=8,
-                            maximum=60,
-                        ),
-                    ),
-                },
-                environment=vr_task_logic.BlockStructure(
-                    blocks=[
-                        make_block(
-                            p_rew=(1, 1, None),
-                            n_min_patches=100000,
-                            make_patch_kwargs={
-                                "inter_patch_min_length": 50,
-                                "inter_patch_mean_length": 120,
-                                "inter_patch_max_length": 150,
-                                "inter_site_length": 15,
-                                "reward_site_length": 40,
-                            },
-                        ),
-                    ],
-                    sampling_mode="Sequential",
-                ),
-                operation_control=make_operation_control(velocity_threshold=60),
-            ),
-        ),
-        start_policies=[Policy(x) for x in [p_learn_to_stop]],
+        task=_make_learn_to_stop_task(p_reward=1.0, stage_name="learn_to_stop"),
+        start_policies=[Policy(p_learn_to_stop)],
+        metrics_provider=MetricsProvider(metrics_from_dataset),
+    )
+
+
+def make_s_learn_to_stop_low_p() -> Stage:
+    """Fallback shaping stage for animals that don't graduate S1 in one session.
+    Same task as S1 but with p_reward=0.8 to discourage stickiness. Saturation
+    gates to S2 are identical to S1's. p_learn_to_stop carries the updater state
+    from the prior session so within-session shaping picks up where it left off."""
+    return Stage(
+        name="learn_to_stop_low_p",
+        task=_make_learn_to_stop_task(p_reward=0.8, stage_name="learn_to_stop_low_p"),
+        start_policies=[Policy(p_learn_to_stop)],
         metrics_provider=MetricsProvider(metrics_from_dataset),
     )
 
@@ -213,7 +230,7 @@ def make_s_learn_to_choose() -> Stage:
         "inter_patch_max_length": 190,
         "inter_site_length": 15,
         "reward_site_length": 50,
-        "reward_amount": 5.0,
+        "reward_amount": 3.3,
         "stop_duration": 1.5,
     }
     return Stage(
@@ -234,16 +251,16 @@ def make_s_learn_to_choose() -> Stage:
                     blocks=[
                         make_block(
                             p_rew=(0.9, 0.1, None),
-                            n_min_patches=40,
-                            block_length_exp_mean=25,
-                            block_length_max=90,
+                            n_min_patches=60,
+                            block_length_exp_mean=15,
+                            block_length_max=100,
                             make_patch_kwargs=_make_patch_kwargs,
                         ),
                         make_block(
                             p_rew=(0.1, 0.9, None),
-                            n_min_patches=40,
-                            block_length_exp_mean=25,
-                            block_length_max=90,
+                            n_min_patches=60,
+                            block_length_exp_mean=15,
+                            block_length_max=100,
                             make_patch_kwargs=_make_patch_kwargs,
                         ),
                     ],
@@ -257,46 +274,51 @@ def make_s_learn_to_choose() -> Stage:
     )
 
 
-THREE_VALUE_REWARD_PROBABILITIES: tuple[float, ...] = (0.10, 0.40, 0.70)
+THREE_CONTRAST_PROBABILITY_PAIRS: list[tuple[float, float]] = [
+    (0.1, 0.9),
+    (0.9, 0.1),
+    (0.3, 0.7),
+    (0.7, 0.3),
+    (0.5, 0.5),
+]
 GRADUATED_REWARD_PROBABILITIES: tuple[float, ...] = (0.10, 0.30, 0.50, 0.70, 0.90)
-# Applied to both the 3-value and 5-value grids: skip (p_A, p_B) pairs whose sum is
-# below this floor. With 0.4 the only excluded combo is (0.1, 0.1).
+# Applied to the 5-value graduated grid: skip (p_A, p_B) pairs whose sum is below
+# this floor. With 0.4 the only excluded combo is (0.1, 0.1).
 GRADUATED_MIN_PROBABILITY_SUM: float = 0.4
 
 
-def make_s_three_value_grid() -> Stage:
-    """Three-odor intermediate stage. Reward-yielding odors A and B sampled per-block
-    uncoupled from {0.1, 0.4, 0.7}; distractor odor C always 0%. Occupancy
-    [A=0.475, B=0.475, C=0.05]. REWARD_DELAY_OFFSET ramps 0 -> 1.5 s within session,
-    carried forward via p_seed_reward_delay."""
+def make_s_three_contrast() -> Stage:
+    """Two-odor paired-block stage. Five blocks covering three contrasts:
+    (0.1/0.9, 0.3/0.7, 0.5/0.5) with mirrored variants for symmetric odor exposure.
+    REWARD_DELAY_OFFSET ramps 0 -> 1.5 s while STOP_DURATION_OFFSET ramps 0 -> -0.5 s
+    at mirrored rates, so effective stop+delay stays at 2.0 s until stop saturates
+    at 1.0 s, after which total grows to 3.0 s as delay finishes saturating. Both
+    offsets are seeded across sessions via p_seed_reward_delay / p_seed_stop_duration."""
     _make_patch_kwargs = {
         "inter_patch_min_length": 30,
         "inter_patch_mean_length": 60,
         "inter_patch_max_length": 190,
         "inter_site_length": 15,
         "reward_site_length": 50,
-        "reward_amount": 5.0,
+        "reward_amount": 3.3,
         "stop_duration": 1.5,
     }
 
     blocks = [
         make_block(
-            p_rew=(p_a, p_b, 0.0),
-            n_min_patches=40,
-            block_length_exp_mean=25,
-            block_length_max=90,
-            first_state_occupancy=[0.475, 0.475, 0.05],
+            p_rew=(p_a, p_b, None),
+            n_min_patches=50,
+            block_length_exp_mean=10,
+            block_length_max=80,
             make_patch_kwargs=_make_patch_kwargs,
         )
-        for p_a in THREE_VALUE_REWARD_PROBABILITIES
-        for p_b in THREE_VALUE_REWARD_PROBABILITIES
-        if p_a + p_b >= GRADUATED_MIN_PROBABILITY_SUM
+        for p_a, p_b in THREE_CONTRAST_PROBABILITY_PAIRS
     ]
 
     return Stage(
-        name="three_value_grid",
+        name="three_contrast",
         task=AindVrForagingTaskLogic(
-            stage_name="three_value_grid",
+            stage_name="three_contrast",
             task_parameters=AindVrForagingTaskParameters(
                 rng_seed=None,
                 updaters={
@@ -304,6 +326,12 @@ def make_s_three_value_grid() -> Stage:
                         operation=vr_task_logic.NumericalUpdaterOperation.OFFSET,
                         parameters=vr_task_logic.NumericalUpdaterParameters(
                             initial_value=0, on_success=0.005, minimum=0, maximum=1.5
+                        ),
+                    ),
+                    vr_task_logic.UpdaterTarget.STOP_DURATION_OFFSET: vr_task_logic.NumericalUpdater(
+                        operation=vr_task_logic.NumericalUpdaterOperation.OFFSET,
+                        parameters=vr_task_logic.NumericalUpdaterParameters(
+                            initial_value=0, on_success=-0.005, minimum=-0.5, maximum=0
                         ),
                     ),
                 },
@@ -314,7 +342,7 @@ def make_s_three_value_grid() -> Stage:
                 operation_control=make_operation_control(velocity_threshold=8),
             ),
         ),
-        start_policies=[Policy(p_seed_reward_delay)],
+        start_policies=[Policy(p_seed_reward_delay), Policy(p_seed_stop_duration)],
         metrics_provider=MetricsProvider(metrics_from_dataset),
     )
 
@@ -328,21 +356,20 @@ def _graduated_reward_delay(max_delay: float = 5.25, char: float = 2.0) -> distr
 
 
 def make_s_graduated_narrow_delay() -> Stage:
-    """Variable-delay preview of the graduated stage. Same patches and grid as
-    `make_s_graduated_stage`, but the base reward-delay distribution is truncated
-    at 5.25 s (mean ~2.0 s, matching S3's end-of-session effective delay). A small
-    REWARD_DELAY_OFFSET updater ramps 0 -> 0.1 within each session so the effective
-    mean climbs to ~2.1 s by end-of-session, matching S5's fixed mean. No start
-    policies: every S4 session ramps fresh from offset 0 (avoids the cross-stage
-    base mismatch with S3's scalar-base offset)."""
+    """Narrow-variance preview of the graduated stage. Same 24-block 5x5 grid as
+    `make_s_graduated_stage` (with the 5% no-reward distractor odor C), but the
+    reward-delay distribution uses char=1.5 s (mean ~1.4 s) vs S5's char=2.0 s
+    (mean ~1.7 s). Stop duration is held at 1.0 s, matching end-of-S3 where the
+    coupled ramps land. No updaters and no start policies: this stage is a fixed
+    regime that bridges S3's ramped behavior and S5's wider delay variance."""
     _make_patch_kwargs = {
         "inter_patch_min_length": 30,
         "inter_patch_mean_length": 60,
         "inter_patch_max_length": 190,
         "inter_site_length": 15,
         "reward_site_length": 50,
-        "reward_amount": 5.0,
-        "stop_duration": 1.5,
+        "reward_amount": 3.3,
+        "stop_duration": 1.0,
         "delay": _graduated_reward_delay(max_delay=5.25, char=1.5),
     }
 
@@ -350,8 +377,8 @@ def make_s_graduated_narrow_delay() -> Stage:
         make_block(
             p_rew=(p_a, p_b, 0.0),
             n_min_patches=40,
-            block_length_exp_mean=25,
-            block_length_max=90,
+            block_length_exp_mean=10,
+            block_length_max=70,
             first_state_occupancy=[0.475, 0.475, 0.05],
             make_patch_kwargs=_make_patch_kwargs,
         )
@@ -366,14 +393,6 @@ def make_s_graduated_narrow_delay() -> Stage:
             stage_name="graduated_narrow_delay",
             task_parameters=AindVrForagingTaskParameters(
                 rng_seed=None,
-                updaters={
-                    vr_task_logic.UpdaterTarget.REWARD_DELAY_OFFSET: vr_task_logic.NumericalUpdater(
-                        operation=vr_task_logic.NumericalUpdaterOperation.OFFSET,
-                        parameters=vr_task_logic.NumericalUpdaterParameters(
-                            initial_value=0, on_success=0.001, minimum=0, maximum=0.21
-                        ),
-                    ),
-                },
                 environment=vr_task_logic.BlockStructure(
                     blocks=blocks,
                     sampling_mode="Random",
@@ -392,17 +411,17 @@ def make_s_graduated_stage() -> Stage:
         "inter_patch_max_length": 190,
         "inter_site_length": 15,
         "reward_site_length": 50,
-        "reward_amount": 5.0,
-        "stop_duration": 1.5,
+        "reward_amount": 3.3,
+        "stop_duration": 1.0,
         "delay": _graduated_reward_delay(),
     }
 
     blocks = [
         make_block(
             p_rew=(p_a, p_b, 0.0),
-            n_min_patches=40,
-            block_length_exp_mean=25,
-            block_length_max=90,
+            n_min_patches=30,
+            block_length_exp_mean=10,
+            block_length_max=60,
             first_state_occupancy=[0.475, 0.475, 0.05],
             make_patch_kwargs=_graduated_make_patch_kwargs,
         )
